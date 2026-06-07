@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson Module - Agent Task Suites and Evaluation Rubrics</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked-katex-extension/lib/index.umd.js"></script>
+
+  <script>
+    // Minimal Tailwind shim (used only if CDN fails). This keeps the page functional without external deps.
+    (function(){
+      var ok = true;
+      try{
+        if(!window.tailwind) ok = false;
+      }catch(e){ ok = false; }
+    })();
+  </script>
+  <style>
+    /* ========================================
+      PREMIUM THEME & TYPOGRAPHY VARIABLES
+      ========================================
+    */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root{
+      --bg-base: #05050a;
+      --bg-surface: rgba(17, 18, 28, 0.65);
+      --bg-surface-hover: rgba(255, 255, 255, 0.05);
+      
+      --stroke-soft: rgba(255, 255, 255, 0.08);
+      --stroke-strong: rgba(255, 255, 255, 0.15);
+      
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-heading: #ffffff;
+      
+      --accent-primary: #8b5cf6;
+      --accent-secondary: #3b82f6;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      
+      --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --shadow-glow: 0 0 40px rgba(139, 92, 246, 0.15);
+      
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      
+      --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      
+      /* New Wider Content Width */
+      --content-max-width: 1200px; 
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      /* Dynamic ambient background */
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.08), transparent 40%),
+        radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.08), transparent 40%);
+      background-attachment: fixed;
+    }
+
+    /* ========================================
+      LAYOUT & SHELL
+      ========================================
+    */
+    main {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .view-shell {
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    
+    .view-inner {
+      padding: clamp(20px, 4vw, 48px) 24px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ========================================
+      TOP HEADER & TYPOGRAPHY
+      ========================================
+    */
+    .topbar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+      margin-bottom: 40px;
+      width: 100%;
+      max-width: var(--content-max-width);
+      animation: fadeDown 0.6s ease-out;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border: 1px solid var(--stroke-strong);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 999px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent-gradient);
+      box-shadow: 0 0 8px var(--accent-primary);
+    }
+
+    .title {
+      margin: 8px 0 0 0;
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--text-heading);
+      background: linear-gradient(to right, #ffffff, #a5b4fc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: clamp(16px, 1.5vw, 18px);
+      line-height: 1.6;
+      max-width: 60ch;
+    }
+
+    /* ========================================
+      MAIN CARD (WIDER VIEWPORT)
+      ========================================
+    */
+    .grid {
+      display: flex;
+      width: 100%;
+      justify-content: center;
+      flex-grow: 1;
+    }
+
+    .card {
+      width: 100%;
+      max-width: var(--content-max-width);
+      border: 1px solid var(--stroke-soft);
+      background: var(--bg-surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-soft), var(--shadow-glow);
+    }
+
+    .card-h {
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--stroke-soft);
+      background: rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-h h2 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .card-b {
+      padding: clamp(24px, 5vw, 56px);
+      flex-grow: 1;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #c4b5fd;
+    }
+
+    /* ========================================
+      NAVIGATION BOTTOM BAR
+      ========================================
+    */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 24px;
+      border-top: 1px solid var(--stroke-soft);
+      background: rgba(5, 5, 10, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 14px 28px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke-strong);
+      background: var(--bg-surface);
+      color: var(--text-heading);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--bg-surface-hover);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      border: none;
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #9f7aea, #60a5fa);
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ========================================
+      ENHANCED MARKDOWN TYPOGRAPHY
+      ========================================
+    */
+    .markdown-body {
+      max-width: 100%;
+      margin: 0 auto;
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--text-main);
+    }
+
+    .markdown-body h1, 
+    .markdown-body h2, 
+    .markdown-body h3 {
+      color: var(--text-heading);
+      font-weight: 600;
+      margin-top: 2em;
+      margin-bottom: 0.75em;
+      line-height: 1.3;
+    }
+
+    .markdown-body h1 { 
+      font-size: 2.25em; 
+      letter-spacing: -0.02em;
+    }
+    
+    .markdown-body h2 { 
+      font-size: 1.75em; 
+      letter-spacing: -0.01em;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid var(--stroke-soft);
+    }
+    
+    .markdown-body h3 { 
+      font-size: 1.35em; 
+      color: #e2e8f0;
+    }
+
+    /* Eliminate top margin for the very first element to align with padding */
+    .markdown-body > *:first-child { margin-top: 0; }
+
+    .markdown-body p {
+      margin-top: 0;
+      margin-bottom: 1.25em;
+    }
+
+    .markdown-body ul, 
+    .markdown-body ol {
+      margin-top: 0;
+      margin-bottom: 1.5em;
+      padding-left: 1.5em;
+    }
+
+    .markdown-body li {
+      margin-bottom: 0.5em;
+    }
+
+    .markdown-body li > ul, 
+    .markdown-body li > ol {
+      margin-top: 0.5em;
+    }
+
+    .markdown-body strong {
+      color: var(--text-heading);
+      font-weight: 600;
+    }
+
+    .markdown-body a {
+      color: var(--accent-secondary);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    .markdown-body a:hover {
+      border-bottom-color: var(--accent-secondary);
+    }
+
+    .markdown-body code {
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.2em 0.4em;
+      border-radius: 6px;
+      font-size: 0.9em;
+      color: #93c5fd; /* Light blue tint for inline code */
+    }
+
+    .markdown-body pre {
+      background: #0d1117;
+      border: 1px solid var(--stroke-soft);
+      border-radius: var(--radius-md);
+      padding: 1.25em;
+      overflow-x: auto;
+      margin-bottom: 1.5em;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .markdown-body pre code {
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      color: #e2e8f0;
+      font-size: 0.9em;
+      line-height: 1.6;
+    }
+
+    .markdown-body blockquote {
+      margin: 0 0 1.5em 0;
+      padding: 0.5em 0 0.5em 1.5em;
+      border-left: 4px solid var(--accent-primary);
+      color: var(--text-muted);
+      background: linear-gradient(to right, rgba(139, 92, 246, 0.05), transparent);
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+
+    .markdown-body blockquote p:last-child {
+      margin-bottom: 0;
+    }
+
+    .markdown-body hr {
+      border: none;
+      height: 1px;
+      background: var(--stroke-strong);
+      margin: 3em 0;
+    }
+
+    /* ========================================
+      TASK CARD STYLES (STRUCTURED CARDS)
+      ========================================
+    */
+    .task-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .task-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--stroke-soft);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .task-card:hover {
+      border-color: var(--stroke-strong);
+      transform: translateY(-2px);
+    }
+    .task-card h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.25em;
+      color: var(--accent-secondary);
+    }
+    .objective-card {
+      border-left: 4px solid var(--accent-primary);
+    }
+    .instructions-list {
+      padding-left: 20px;
+    }
+    .instructions-list li {
+      margin-bottom: 12px;
+    }
+    .criteria-checklist {
+      list-style: none;
+      padding-left: 0;
+    }
+    .criteria-checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .criteria-checklist li::before {
+      content: "✓";
+      color: #10b981;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* KaTeX overrides for dark mode */
+    .katex {
+      color: var(--text-heading);
+      font-size: 1.1em;
+    }
+
+    /* ========================================
+      TRANSITIONS & ANIMATIONS
+      ========================================
+    */
+    .transition-opacity { transition: opacity 400ms ease, transform 400ms ease; }
+    .opacity-100 { opacity: 1; transform: translateY(0); }
+    .opacity-0 { opacity: 0; transform: translateY(10px); }
+    .hidden { display: none !important; }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .transition-opacity { transition: none !important; }
+      .btn { transition: none !important; }
+      .topbar { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <textarea id="markdown-source" style="display:none;">
+    [
+  {
+    "id": "guide_page_1",
+    "content": "# Page 1 \u2014 Objective and Prerequisites\n\n## Objective\nBuild a practical quantum simulation workflow that lets you:\n1. **Represent a molecular or materials model as a Hamiltonian**.\n2. **Map that Hamiltonian to qubits** using a fermion-to-qubit transformation.\n3. **Estimate ground-state energy** with a variational algorithm like **VQE**.\n4. **Simulate time evolution** for dynamics or spectroscopy when needed.\n5. **Interpret the output** as energies, expectation values, and approximate material properties.\n\n## What you need before starting\n### Technical prerequisites\n- **Python 3.10+**\n- One quantum SDK, such as:\n  - **Qiskit Nature + Qiskit Runtime / Aer**, or\n  - **PennyLane**, or\n  - **Cirq** with custom operators\n- A chemistry/molecular driver or data source, such as:\n  - **PySCF** for electronic structure integrals\n  - **Psi4** if supported in your stack\n- Linear algebra and scientific Python tools:\n  - **NumPy**\n  - **SciPy**\n- Optional but useful:\n  - Access to a **quantum simulator backend**\n  - Access to **real quantum hardware** through a provider account\n  - Visualization tools like **Matplotlib**\n\n## What to decide first\n- **Target problem type**:\n  - Molecule: H2, LiH, BeH2, small active space problem\n  - Materials model: Ising, Heisenberg, Hubbard\n- **Goal**:\n  - Ground-state energy via VQE\n  - Dynamics via Hamiltonian simulation\n- **Encoding strategy**:\n  - Orbital basis for chemistry\n  - Lattice/spin basis for materials\n\n## How to think about success\nYou are not trying to \u201csolve all chemistry.\u201d You are building a pipeline that:\n- starts from a physical model,\n- converts it into a qubit Hamiltonian,\n- runs a quantum algorithm,\n- and returns an approximate physical quantity.\n\n## Example starting point\nA good first target is **H2 in a minimal basis** because it is small enough to test the full workflow while still showing the complete process from Hamiltonian to energy estimate."
+  },
+  {
+    "id": "guide_page_2",
+    "content": "# Page 2 \u2014 Build the Hamiltonian and Map It to Qubits\n\n## Step 1: Choose a physical model\n### Action\nSelect a molecule or model Hamiltonian to simulate.\n\n### Why\nYour algorithm needs a concrete operator to work on; the quality of the result depends on how well the Hamiltonian captures the physics.\n\n### How (Example)\n- **Chemistry**: Use H2 at a fixed bond length.\n- **Materials**: Use a 2-site Hubbard model or a 4-qubit Ising chain.\n\n---\n\n## Step 2: Define the basis set or lattice representation\n### Action\nChoose the basis in which the system is expressed.\n\n### Why\nThe basis determines the number of qubits, the Hamiltonian structure, and the accuracy-cost tradeoff.\n\n### How (Example)\n- **Chemistry**: Use a minimal basis like **STO-3G**.\n- **Materials**: Use a site basis where each lattice site or spin becomes a qubit.\n\n---\n\n## Step 3: Generate the second-quantized Hamiltonian\n### Action\nCompute or load the electronic Hamiltonian terms: one-body and two-body contributions.\n\n### Why\nQuantum algorithms work most naturally from a formal Hamiltonian rather than directly from a chemical diagram.\n\n### How (Example)\nWith a chemistry toolchain, obtain terms such as:\n- electron kinetic energy\n- electron-nucleus attraction\n- electron-electron repulsion\n- nucleus-nucleus repulsion\n\nA typical output is a fermionic Hamiltonian in creation/annihilation operators.\n\n---\n\n## Step 4: Map fermions to qubits\n### Action\nApply a transformation such as **Jordan-Wigner** or **Bravyi-Kitaev**.\n\n### Why\nElectrons are fermions, but quantum circuits operate on qubits. The mapping converts fermionic operators into measurable qubit operators.\n\n### How (Example)\nConvert a term like a fermionic interaction into a sum of Pauli strings:\n- `X \u2297 X`\n- `Y \u2297 Y`\n- `Z \u2297 I`\n- `I \u2297 Z`\n\nIn practice, your Hamiltonian becomes:\n\\[\nH = \\sum_i c_i P_i\n\\]\nwhere each `P_i` is a Pauli string.\n\n---\n\n## Step 5: Reduce the problem size if needed\n### Action\nFreeze core orbitals, choose an active space, or truncate the model.\n\n### Why\nSmaller Hamiltonians are easier to run on near-term hardware and are often sufficient for a first meaningful result.\n\n### How (Example)\nFor a larger molecule, keep only the frontier orbitals most relevant to bonding and excitation.\n\n## Practical checkpoint\nAt the end of this page, you should have:\n- a chosen physical system,\n- a finite basis or lattice description,\n- and a qubit Hamiltonian written as a weighted sum of Pauli terms."
+  },
+  {
+    "id": "guide_page_3",
+    "content": "# Page 3 \u2014 Run VQE to Estimate the Ground State\n\n## Step 6: Choose an ansatz circuit\n### Action\nSelect a parameterized quantum circuit to prepare trial states.\n\n### Why\nVQE searches for the lowest-energy state within the family of states your circuit can represent.\n\n### How (Example)\n- **Chemistry-inspired ansatz**: UCC-like or problem-informed structure\n- **Hardware-efficient ansatz**: layers of single-qubit rotations plus entangling gates\n\nFor a first experiment, use a shallow ansatz with a small number of parameters.\n\n---\n\n## Step 7: Prepare the trial state on the quantum device or simulator\n### Action\nInitialize the circuit with a parameter vector and execute it.\n\n### Why\nThe prepared state is what you will measure to estimate the Hamiltonian expectation value.\n\n### How (Example)\nIf your circuit has parameters `\u03b8 = [\u03b81, \u03b82, ...]`, start with zeros or random small values and run the circuit once per parameter setting.\n\n---\n\n## Step 8: Measure each Pauli term in the Hamiltonian\n### Action\nMeasure the expectation value of each Pauli string using the correct basis rotation.\n\n### Why\nThe total energy is the weighted sum of these measured expectations.\n\n### How (Example)\nFor a term like `X \u2297 Y`, rotate qubits into the X/Y measurement basis before sampling. Then estimate:\n\\[\n\\langle H \\rangle = \\sum_i c_i \\langle P_i \\rangle\n\\]\nusing many shots per term.\n\n---\n\n## Step 9: Optimize the parameters classically\n### Action\nFeed the measured energy into a classical optimizer and update the circuit parameters.\n\n### Why\nVQE is hybrid: the quantum processor evaluates the energy, and classical optimization finds lower-energy parameters.\n\n### How (Example)\nUse optimizers such as:\n- COBYLA\n- SPSA\n- Nelder-Mead\n\nLoop until the energy stops improving or reaches a target tolerance.\n\n---\n\n## Step 10: Validate the result\n### Action\nCompare the estimated energy to a known reference or classical benchmark.\n\n### Why\nYou need to confirm that the circuit, mapping, and measurement logic are correct.\n\n### How (Example)\nFor H2, compare the VQE energy against a classical exact diagonalization or trusted chemistry calculation.\n\n## Practical checkpoint\nYou should now have:\n- a parameterized circuit,\n- a measured energy estimate,\n- and a converged or improving VQE optimization trace."
+  },
+  {
+    "id": "guide_page_4",
+    "content": "# Page 4 \u2014 Extend to Time Evolution and Materials Simulation\n\n## Step 11: Simulate dynamics when ground-state energy is not enough\n### Action\nUse Hamiltonian time evolution methods to approximate:\n\\[\nU(t) = e^{-iHt}\n\\]\n\n### Why\nMany real problems involve reaction dynamics, transport, and spectroscopy, not just static energies.\n\n### How (Example)\n- Apply **Trotterization** for short-time approximate evolution.\n- Use more advanced methods like **qubitization** when scaling and accuracy matter.\n\n---\n\n## Step 12: Translate the same workflow to materials models\n### Action\nReplace the molecular Hamiltonian with a spin or lattice model.\n\n### Why\nThe same quantum-simulation machinery applies to magnetism, correlated electrons, and phase transitions.\n\n### How (Example)\n- **Ising model**: study magnetic ordering and phase behavior\n- **Heisenberg model**: analyze spin correlations\n- **Hubbard model**: explore strongly correlated electrons and superconductivity-related physics\n\n---\n\n## Step 13: Tune the model encoding and basis carefully\n### Action\nRevisit basis choice, truncation, and ansatz design for each new system.\n\n### Why\nAccuracy and cost depend strongly on how the physical system is encoded.\n\n### How (Example)\n- In chemistry, compare active-space sizes and basis sets.\n- In materials, test different lattice sizes or boundary conditions.\n\n---\n\n## Step 14: Build a repeatable simulation workflow\n### Action\nStandardize the pipeline into reusable stages.\n\n### Why\nA consistent workflow makes it easier to scale from toy examples to useful research problems.\n\n### How (Example)\nUse this sequence every time:\n1. Define the physical system\n2. Generate the Hamiltonian\n3. Map to qubits\n4. Choose VQE or time evolution\n5. Measure observables\n6. Compare to reference data\n7. Refine the encoding or ansatz\n\n## Final takeaway\nA practical quantum simulation workflow is not just \u201crun a quantum circuit.\u201d It is a disciplined process of:\n- modeling the physics,\n- encoding it in qubits,\n- selecting the right algorithm,\n- and extracting observables through measurement.\n\nStart with small systems, verify against classical results, and expand only when the mapping, circuit, and measurement pipeline are stable."
+  }
+]
+  </textarea>
+
+  <main>
+    <section id="lesson-app" style="width: 100%;">
+      <div class="view-shell">
+        <div class="view-inner">
+          <div class="topbar">
+            <div class="badge">
+              <span class="dot"></span>
+              <span>Practical Guide</span>
+            </div>
+            <h1 class="title">Practical Guide</h1>
+            <p class="subtitle">A step-by-step walkthrough of the implementation.</p>
+          </div>
+
+          <div class="grid">
+            <div class="card">
+              <div class="card-b">
+                <div id="sections-wrapper">
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav">
+          <button type="button" class="btn" id="prevBtn" aria-label="Previous section">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Previous</span>
+          </button>
+          <button type="button" class="btn btn-primary" id="nextBtn" aria-label="Next section">
+            <span>Continue to Next</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  (function () {
+  // ==========================================
+  // 1. HELPER FUNCTIONS
+  // ==========================================
+
+  function escapeHtml(s){
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function simpleMarkdownToHtml(md){
+    var lines = String(md || '').replace(/\r\n/g, '\n').split('\n');
+    var html = [];
+    var inCodeFence = false;
+    var codeLang = '';
+    var codeBuf = [];
+
+    function flushCode(){
+      if(!codeBuf.length) return;
+      var code = escapeHtml(codeBuf.join('\n'));
+      html.push('<pre><code' + (codeLang ? ' class="language-' + escapeHtml(codeLang) + '"' : '') + '>' + code + '</code></pre>');
+      codeBuf = [];
+      codeLang = '';
+    }
+
+    for(var i=0;i<lines.length;i++){
+      var line = lines[i];
+
+      var fenceMatch = line.match(/^\s*```(\w+)?\s*$/);
+      if(fenceMatch){
+        if(!inCodeFence){
+          inCodeFence = true;
+          codeLang = fenceMatch[1] || '';
+          codeBuf = [];
+        } else {
+          inCodeFence = false;
+          flushCode();
+        }
+        continue;
+      }
+
+      if(inCodeFence){
+        codeBuf.push(line);
+        continue;
+      }
+
+      if(/^\s*---\s*$/.test(line)){
+        html.push('<hr/>');
+        continue;
+      }
+
+      var headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+      if(headingMatch){
+        var level = headingMatch[1].length;
+        var text = headingMatch[2].trim();
+        html.push('<h' + level + '>' + renderInline(text) + '</h' + level + '>');
+        continue;
+      }
+
+      var ulMatch = line.match(/^\s*-\s+(.*)$/);
+      if(ulMatch){
+        var items = [];
+        while(i < lines.length && (m = lines[i].match(/^\s*-\s+(.*)$/))){
+          items.push('<li>' + renderInline(m[1].trim()) + '</li>');
+          i++;
+        }
+        i--;
+        html.push('<ul>' + items.join('') + '</ul>');
+        continue;
+      }
+
+      if(line.trim() === ''){
+        continue;
+      }
+
+      html.push('<p>' + renderInline(line.trim()) + '</p>');
+    }
+
+    flushCode();
+    return html.join('');
+
+    function renderInline(text){
+      var out = escapeHtml(text);
+      out = out.replace(/`([^`]+)`/g, function(_, code){ return '<code>' + code + '</code>'; });
+      out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      return out;
+    }
+  }
+
+  // ==========================================
+  // 2. DATA EXTRACTION & DYNAMIC PAGE CREATION
+  // ==========================================
+
+  var rawEl = document.getElementById('markdown-source');
+  var raw = rawEl ? rawEl.value : '[]';
+
+  var lessonParts;
+  try {
+    var parsedData = JSON.parse(raw.trim());
+    // UPDATED LOGIC: Handle both a direct array or the `{ parts: [...] }` object structure
+    lessonParts = Array.isArray(parsedData) ? parsedData : (parsedData.parts || []);
+  } catch(e) {
+    lessonParts = []; 
+  }
+  if(!Array.isArray(lessonParts)) lessonParts = [];
+
+  var wrapper = document.getElementById('sections-wrapper');
+  if (wrapper) wrapper.innerHTML = ''; 
+
+  lessonParts.forEach(function(part) {
+    var article = document.createElement('article');
+    article.id = part.id;
+    article.className = 'lesson-section transition-opacity duration-300 opacity-0 hidden';
+    
+    var innerDiv = document.createElement('div');
+    innerDiv.className = 'markdown-body';
+    innerDiv.setAttribute('data-content-target', part.id);
+    
+    article.appendChild(innerDiv);
+    if (wrapper) wrapper.appendChild(article);
+  });
+
+  // ==========================================
+  // 3. MARKDOWN PARSING & INJECTION
+  // ==========================================
+
+  var hasMarked = typeof window.marked !== 'undefined' && window.marked && typeof window.marked.parse === 'function';
+  
+  if(hasMarked){
+    try{
+      // Attach the KaTeX extension so formulas render properly
+      if (typeof window.markedKatex !== 'undefined') {
+        window.marked.use(window.markedKatex({
+          throwOnError: false,
+          output: 'html'
+        }));
+      }
+      window.marked.setOptions({ breaks: false, gfm: true });
+    }catch(e){}
+  }
+
+  lessonParts.forEach(function (part) {
+    var target = document.querySelector('[data-content-target="' + part.id + '"]');
+    if (target) {
+      var content = (part.content || '').trim();
+      // If the content starts with an HTML tag, inject it directly to bypass Markdown escaping
+      if (content.startsWith('<')) {
+        target.innerHTML = content;
+      } else {
+        target.innerHTML = hasMarked ? window.marked.parse(content) : simpleMarkdownToHtml(content);
+      }
+    }
+  });
+
+  // ==========================================
+  // 4. NAVIGATION STATE & LOGIC
+  // ==========================================
+
+  var sections = lessonParts
+    .map(function(part){ return document.getElementById(part.id); })
+    .filter(Boolean);
+
+  var currentIndex = 0; 
+
+  var contentStatus = document.getElementById('content-status');
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+
+  function updateMeta(index) {
+    if(contentStatus) contentStatus.textContent = 'Section ' + (index + 1) + ' of ' + lessonParts.length;
+
+    var atFirst = index === 0;
+    var atLast = index === lessonParts.length - 1;
+
+    if(prevBtn){
+      prevBtn.disabled = atFirst;
+    }
+    if(nextBtn){
+      nextBtn.disabled = atLast;
+    }
+    
+    var cardElement = document.querySelector('.card');
+    if(cardElement && window.scrollY > cardElement.offsetTop) {
+        window.scrollTo({ top: cardElement.offsetTop - 20, behavior: 'smooth' });
+    }
+  }
+
+  function showSection(index) {
+    if(!sections.length) return;
+    sections.forEach(function (section, i) {
+      if (i === index) {
+        section.classList.remove('hidden');
+        requestAnimationFrame(function () {
+          section.classList.remove('opacity-0');
+          section.classList.add('opacity-100');
+        });
+      } else {
+        section.classList.add('opacity-0');
+        section.classList.remove('opacity-100');
+        section.classList.add('hidden');
+      }
+    });
+    currentIndex = index;
+    updateMeta(index);
+  }
+
+  function transitionTo(index) {
+    if(!sections.length) return;
+    if (index < 0 || index >= sections.length || index === currentIndex) return;
+
+    var current = sections[currentIndex];
+    if(!current) return;
+
+    current.classList.add('opacity-0');
+    current.classList.remove('opacity-100');
+
+    window.setTimeout(function () {
+      current.classList.add('hidden'); 
+      
+      var next = sections[index];
+      if(!next) return;
+
+      next.classList.remove('hidden'); 
+      requestAnimationFrame(function () {
+        next.classList.remove('opacity-0');
+        next.classList.add('opacity-100');
+      });
+
+      currentIndex = index;
+      updateMeta(index);
+    }, 400);
+  }
+
+  // ==========================================
+  // 5. EVENT LISTENERS & INITIALIZATION
+  // ==========================================
+
+  if(prevBtn) prevBtn.addEventListener('click', function () { transitionTo(currentIndex - 1); });
+  if(nextBtn) nextBtn.addEventListener('click', function () { transitionTo(currentIndex + 1); });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'ArrowLeft') transitionTo(currentIndex - 1);
+    if (event.key === 'ArrowRight') transitionTo(currentIndex + 1);
+  });
+
+  if(sections.length) {
+    showSection(0);
+  } else {
+    updateMeta(0); 
+  }
+
+})();
+  </script>
+</body>
+</html>

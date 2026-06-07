@@ -1,0 +1,839 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Removing Lignin Curriculum</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+:root {
+    --bg-base: #030712;
+    --panel-bg: rgba(17, 24, 39, 0.7);
+    --panel-border: rgba(255, 255, 255, 0.08);
+    --panel-hover: rgba(31, 41, 55, 0.85);
+    --text-main: #f9fafb;
+    --text-muted: #9ca3af;
+    --accent-primary: #8b5cf6;
+    --accent-secondary: #14b8a6;
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    --shadow-glow: 0 0 30px rgba(139, 92, 246, 0.25);
+    --radius-xl: 24px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-base);
+    color: var(--text-main);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+.bg-mesh {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    background: 
+        radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.15), transparent 40%),
+        radial-gradient(circle at 85% 30%, rgba(15, 118, 110, 0.15), transparent 40%),
+        radial-gradient(circle at 50% 80%, rgba(17, 24, 39, 0.9), transparent 60%);
+    background-size: 150% 150%;
+    animation: gradientMove 20s ease-in-out infinite alternate;
+}
+
+@keyframes gradientMove {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 100%; }
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 24px;
+}
+
+h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: slideDown 0.6s ease-out forwards;
+}
+
+p.subtitle {
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    margin-bottom: 4rem;
+    max-width: 600px;
+    animation: slideDown 0.8s ease-out forwards;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 32px;
+}
+
+.course-card {
+    background: var(--panel-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-xl);
+    padding: 32px;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes fadeIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.course-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.03), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+}
+
+.course-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(139, 92, 246, 0.5);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    background: var(--panel-hover);
+}
+
+.course-card:hover::before {
+    transform: translateX(100%);
+}
+
+.course-card h3 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #fff;
+    line-height: 1.3;
+}
+
+.course-card .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.meta-tag {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: all 0.2s ease;
+}
+
+.course-card:hover .meta-tag {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent-secondary);
+    text-decoration: none;
+    font-weight: 600;
+    margin-bottom: 32px;
+    transition: all 0.3s ease;
+    padding: 10px 20px;
+    border-radius: 30px;
+    background: rgba(20, 184, 166, 0.1);
+    border: 1px solid rgba(20, 184, 166, 0.2);
+}
+
+.back-link:hover {
+    background: rgba(20, 184, 166, 0.2);
+    border-color: rgba(20, 184, 166, 0.4);
+    transform: translateX(-4px);
+    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.15);
+}
+
+.curriculum-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 20px;
+}
+
+details.section-container {
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+details.section-container[open] {
+    border-color: rgba(139, 92, 246, 0.4);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+
+summary.section-header {
+    padding: 24px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.02);
+    transition: background 0.2s ease;
+}
+
+summary.section-header:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+summary.section-header::after {
+    content: '+';
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: var(--accent-primary);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    line-height: 1;
+}
+
+details[open] summary.section-header::after {
+    transform: rotate(45deg);
+    color: var(--text-main);
+}
+
+summary::-webkit-details-marker {
+    display: none;
+}
+
+.lesson-list {
+    padding: 0;
+    border-top: 1px solid var(--panel-border);
+    animation: slideDownFade 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDownFade {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.lesson-item {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s ease;
+}
+
+.lesson-item:last-child {
+    border-bottom: none;
+}
+
+.lesson-item:hover {
+    background: rgba(255,255,255,0.03);
+}
+
+.lesson-title {
+    font-weight: 500;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: var(--text-main);
+}
+
+.lesson-title::before {
+    content: '';
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: background 0.3s;
+}
+
+.lesson-item:hover .lesson-title::before {
+    background: var(--accent-primary);
+    box-shadow: 0 0 10px var(--accent-primary);
+}
+
+.btn-group {
+    display: flex;
+    gap: 12px;
+}
+
+.btn {
+    padding: 8px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    backdrop-filter: blur(4px);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    filter: brightness(1.2);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-theory { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.3); }
+.btn-theory:hover { background: rgba(139, 92, 246, 0.25); border-color: rgba(139, 92, 246, 0.6); }
+
+.btn-guide { background: rgba(20, 184, 166, 0.15); color: #5eead4; border: 1px solid rgba(20, 184, 166, 0.3); }
+.btn-guide:hover { background: rgba(20, 184, 166, 0.25); border-color: rgba(20, 184, 166, 0.6); }
+
+.btn-task { background: rgba(245, 158, 11, 0.15); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+.btn-task:hover { background: rgba(245, 158, 11, 0.25); border-color: rgba(245, 158, 11, 0.6); }
+
+.btn-test { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+.btn-test:hover { background: rgba(239, 68, 68, 0.25); border-color: rgba(239, 68, 68, 0.6); }
+</style>
+</head>
+<body>
+    <div class="bg-mesh"></div>
+    <div class="container">
+        <a href="index.html" class="back-link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Back to Dashboard
+        </a>
+        <h1>Removing Lignin</h1>
+        <div class="curriculum-container">
+            
+            <details class="section-container" open>
+                <summary class="section-header">
+                    <span>01 Advanced Solvent Systems</span>
+                </summary>
+                <div class="lesson-list">
+                    
+            <div class="lesson-item">
+                <span class="lesson-title">Closed Loop Solvent And Lignin Recovery Strategies</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/01_Advanced_Solvent_Systems/Closed-Loop Solvent and Lignin Recovery Strategies/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/01_Advanced_Solvent_Systems/Closed-Loop Solvent and Lignin Recovery Strategies/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/01_Advanced_Solvent_Systems/Closed-Loop Solvent and Lignin Recovery Strategies/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Deep Eutectic Solvents For Efficient Delignification</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/01_Advanced_Solvent_Systems/Deep Eutectic Solvents for Efficient Delignification/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/01_Advanced_Solvent_Systems/Deep Eutectic Solvents for Efficient Delignification/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/01_Advanced_Solvent_Systems/Deep Eutectic Solvents for Efficient Delignification/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Ethanol Gvl Organosolv Pretreatment To Expose Cellulose</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/01_Advanced_Solvent_Systems/Ethanol_GVL Organosolv Pretreatment to Expose Cellulose/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/01_Advanced_Solvent_Systems/Ethanol_GVL Organosolv Pretreatment to Expose Cellulose/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/01_Advanced_Solvent_Systems/Ethanol_GVL Organosolv Pretreatment to Expose Cellulose/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">High Solids Process Optimization For Delignification</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/01_Advanced_Solvent_Systems/High-Solids Process Optimization for Delignification/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/01_Advanced_Solvent_Systems/High-Solids Process Optimization for Delignification/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/01_Advanced_Solvent_Systems/High-Solids Process Optimization for Delignification/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Task Specific Ionic Liquids For Selective Lignin Dissolution</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/01_Advanced_Solvent_Systems/Task-Specific Ionic Liquids for Selective Lignin Dissolution/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/01_Advanced_Solvent_Systems/Task-Specific Ionic Liquids for Selective Lignin Dissolution/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/01_Advanced_Solvent_Systems/Task-Specific Ionic Liquids for Selective Lignin Dissolution/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+                    
+            <div class="lesson-item">
+                <span class="lesson-title">Section Task</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/01_Advanced_Solvent_Systems/final_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Section Test</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/01_Advanced_Solvent_Systems/test.html" class="btn btn-test">Test</a>
+                </div>
+            </div>
+            
+                </div>
+            </details>
+            
+            <details class="section-container" >
+                <summary class="section-header">
+                    <span>02 Biological Delignification</span>
+                </summary>
+                <div class="lesson-list">
+                    
+            <div class="lesson-item">
+                <span class="lesson-title">Hybrid Chemo Enzymatic Sequences  Fenton Alkaline Peroxide–Enzyme Synergies</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/02_Biological_Delignification/Hybrid Chemo-Enzymatic Sequences_ Fenton_Alkaline Peroxide–Enzyme Synergies/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/02_Biological_Delignification/Hybrid Chemo-Enzymatic Sequences_ Fenton_Alkaline Peroxide–Enzyme Synergies/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/02_Biological_Delignification/Hybrid Chemo-Enzymatic Sequences_ Fenton_Alkaline Peroxide–Enzyme Synergies/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Laccase–Mediator Systems  Mediator Selection For Selective Lignin Oxidation</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/02_Biological_Delignification/Laccase–Mediator Systems_ Mediator Selection for Selective Lignin Oxidation/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/02_Biological_Delignification/Laccase–Mediator Systems_ Mediator Selection for Selective Lignin Oxidation/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/02_Biological_Delignification/Laccase–Mediator Systems_ Mediator Selection for Selective Lignin Oxidation/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Peroxidase Driven Delignification  Lip, Mnp, Vp And H2O2 Control</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/02_Biological_Delignification/Peroxidase-Driven Delignification_ LiP, MnP, VP and H2O2 Control/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/02_Biological_Delignification/Peroxidase-Driven Delignification_ LiP, MnP, VP and H2O2 Control/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/02_Biological_Delignification/Peroxidase-Driven Delignification_ LiP, MnP, VP and H2O2 Control/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Protecting Cellulose  Strategies For Selectivity In Oxidative Biodelignification</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/02_Biological_Delignification/Protecting Cellulose_ Strategies for Selectivity in Oxidative Biodelignification/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/02_Biological_Delignification/Protecting Cellulose_ Strategies for Selectivity in Oxidative Biodelignification/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/02_Biological_Delignification/Protecting Cellulose_ Strategies for Selectivity in Oxidative Biodelignification/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">White Rot Fungal Ligninolysis  Enzymes, Radicals, And Operating Conditions</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/02_Biological_Delignification/White-Rot Fungal Ligninolysis_ Enzymes, Radicals, and Operating Conditions/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/02_Biological_Delignification/White-Rot Fungal Ligninolysis_ Enzymes, Radicals, and Operating Conditions/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/02_Biological_Delignification/White-Rot Fungal Ligninolysis_ Enzymes, Radicals, and Operating Conditions/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+                    
+            <div class="lesson-item">
+                <span class="lesson-title">Section Task</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/02_Biological_Delignification/final_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Section Test</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/02_Biological_Delignification/test.html" class="btn btn-test">Test</a>
+                </div>
+            </div>
+            
+                </div>
+            </details>
+            
+            <details class="section-container" >
+                <summary class="section-header">
+                    <span>03 Characterization</span>
+                </summary>
+                <div class="lesson-list">
+                    
+            <div class="lesson-item">
+                <span class="lesson-title">Cellulose Surface Accessibility Assays (Simons' Stain, Dye Adsorption, Nmmo)</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/03_Characterization/Cellulose Surface Accessibility Assays (Simons' Stain, Dye Adsorption, NMMO)/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/03_Characterization/Cellulose Surface Accessibility Assays (Simons' Stain, Dye Adsorption, NMMO)/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/03_Characterization/Cellulose Surface Accessibility Assays (Simons' Stain, Dye Adsorption, NMMO)/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Degree Of Polymerization And Crystallinity Index Determination</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/03_Characterization/Degree of Polymerization and Crystallinity Index Determination/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/03_Characterization/Degree of Polymerization and Crystallinity Index Determination/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/03_Characterization/Degree of Polymerization and Crystallinity Index Determination/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Kappa Number, Klason, And Acid Soluble Lignin Quantification</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/03_Characterization/Kappa Number, Klason, and Acid-Soluble Lignin Quantification/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/03_Characterization/Kappa Number, Klason, and Acid-Soluble Lignin Quantification/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/03_Characterization/Kappa Number, Klason, and Acid-Soluble Lignin Quantification/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Microscopy Of Lignin Removal And Cellulose Exposure (Sem, Afm, Confocal)</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/03_Characterization/Microscopy of Lignin Removal and Cellulose Exposure (SEM, AFM, Confocal)/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/03_Characterization/Microscopy of Lignin Removal and Cellulose Exposure (SEM, AFM, Confocal)/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/03_Characterization/Microscopy of Lignin Removal and Cellulose Exposure (SEM, AFM, Confocal)/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Xrd, Ftir, And Solid State Nmr For Cell Wall Structural Analysis</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/03_Characterization/XRD, FTIR, and Solid-State NMR for Cell Wall Structural Analysis/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/03_Characterization/XRD, FTIR, and Solid-State NMR for Cell Wall Structural Analysis/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/03_Characterization/XRD, FTIR, and Solid-State NMR for Cell Wall Structural Analysis/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+                    
+            <div class="lesson-item">
+                <span class="lesson-title">Section Task</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/03_Characterization/final_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Section Test</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/03_Characterization/test.html" class="btn btn-test">Test</a>
+                </div>
+            </div>
+            
+                </div>
+            </details>
+            
+            <details class="section-container" >
+                <summary class="section-header">
+                    <span>04 Chemical Routes</span>
+                </summary>
+                <div class="lesson-list">
+                    
+            <div class="lesson-item">
+                <span class="lesson-title">Acid Chlorite Delignification  Holocellulose Isolation</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/04_Chemical_Routes/Acid Chlorite Delignification_ Holocellulose Isolation/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/04_Chemical_Routes/Acid Chlorite Delignification_ Holocellulose Isolation/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/04_Chemical_Routes/Acid Chlorite Delignification_ Holocellulose Isolation/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Kraft Soda Alkaline Delignification  Mechanisms And Kinetics</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/04_Chemical_Routes/Kraft_Soda Alkaline Delignification_ Mechanisms and Kinetics/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/04_Chemical_Routes/Kraft_Soda Alkaline Delignification_ Mechanisms and Kinetics/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/04_Chemical_Routes/Kraft_Soda Alkaline Delignification_ Mechanisms and Kinetics/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Organosolv Delignification  Solvent Choices And Lignin Recovery</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/04_Chemical_Routes/Organosolv Delignification_ Solvent Choices and Lignin Recovery/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/04_Chemical_Routes/Organosolv Delignification_ Solvent Choices and Lignin Recovery/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/04_Chemical_Routes/Organosolv Delignification_ Solvent Choices and Lignin Recovery/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Oxidative Delignification (O2 O3 H2O2 Peracids)  Mechanisms And Control</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/04_Chemical_Routes/Oxidative Delignification (O2_O3_H2O2_Peracids)_ Mechanisms and Control/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/04_Chemical_Routes/Oxidative Delignification (O2_O3_H2O2_Peracids)_ Mechanisms and Control/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/04_Chemical_Routes/Oxidative Delignification (O2_O3_H2O2_Peracids)_ Mechanisms and Control/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Sulfite Delignification  Chemistry, Ph Regimes, And Selectivity</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/04_Chemical_Routes/Sulfite Delignification_ Chemistry, pH Regimes, and Selectivity/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/04_Chemical_Routes/Sulfite Delignification_ Chemistry, pH Regimes, and Selectivity/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/04_Chemical_Routes/Sulfite Delignification_ Chemistry, pH Regimes, and Selectivity/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+                    
+            <div class="lesson-item">
+                <span class="lesson-title">Section Task</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/04_Chemical_Routes/final_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Section Test</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/04_Chemical_Routes/test.html" class="btn btn-test">Test</a>
+                </div>
+            </div>
+            
+                </div>
+            </details>
+            
+            <details class="section-container" >
+                <summary class="section-header">
+                    <span>05 Mechanisms And Selectivity</span>
+                </summary>
+                <div class="lesson-list">
+                    
+            <div class="lesson-item">
+                <span class="lesson-title">Kraft Delignification Mechanisms And Selectivity (Anthraquinone, H Factor)</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/Kraft Delignification Mechanisms and Selectivity (Anthraquinone, H-Factor)/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/Kraft Delignification Mechanisms and Selectivity (Anthraquinone, H-Factor)/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/Kraft Delignification Mechanisms and Selectivity (Anthraquinone, H-Factor)/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Lignin–Carbohydrate Complex Cleavage For Selective Delignification</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/Lignin–Carbohydrate Complex Cleavage for Selective Delignification/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/Lignin–Carbohydrate Complex Cleavage for Selective Delignification/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/Lignin–Carbohydrate Complex Cleavage for Selective Delignification/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Organosolv Fractionation  Solvent Selection For Selective Lignin Removal</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/Organosolv Fractionation_ Solvent Selection for Selective Lignin Removal/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/Organosolv Fractionation_ Solvent Selection for Selective Lignin Removal/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/Organosolv Fractionation_ Solvent Selection for Selective Lignin Removal/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Oxygen And Peroxide Delignification  Radical Control For Cellulose Preservation</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/Oxygen and Peroxide Delignification_ Radical Control for Cellulose Preservation/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/Oxygen and Peroxide Delignification_ Radical Control for Cellulose Preservation/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/Oxygen and Peroxide Delignification_ Radical Control for Cellulose Preservation/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Preventing Alkaline Peeling Of Cellulose (End Group Stabilization)</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/Preventing Alkaline Peeling of Cellulose (End-Group Stabilization)/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/Preventing Alkaline Peeling of Cellulose (End-Group Stabilization)/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/Preventing Alkaline Peeling of Cellulose (End-Group Stabilization)/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+                    
+            <div class="lesson-item">
+                <span class="lesson-title">Section Task</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/final_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Section Test</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/05_Mechanisms_and_Selectivity/test.html" class="btn btn-test">Test</a>
+                </div>
+            </div>
+            
+                </div>
+            </details>
+            
+            <details class="section-container" >
+                <summary class="section-header">
+                    <span>06 Kinetics And Reactor Design</span>
+                </summary>
+                <div class="lesson-list">
+                    
+            <div class="lesson-item">
+                <span class="lesson-title">Batch Vs. Flow Through Reactor Design For Delignification</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/Batch vs. Flow-Through Reactor Design for Delignification/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/Batch vs. Flow-Through Reactor Design for Delignification/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/Batch vs. Flow-Through Reactor Design for Delignification/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Delignification Selectivity Metrics  Preserving Cellulose While Removing Lignin</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/Delignification Selectivity Metrics_ Preserving Cellulose While Removing Lignin/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/Delignification Selectivity Metrics_ Preserving Cellulose While Removing Lignin/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/Delignification Selectivity Metrics_ Preserving Cellulose While Removing Lignin/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Diffusion And Particle Size Effects In Biomass Pretreatment</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/Diffusion and Particle Size Effects in Biomass Pretreatment/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/Diffusion and Particle Size Effects in Biomass Pretreatment/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/Diffusion and Particle Size Effects in Biomass Pretreatment/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Pretreatment Severity Quantification  Ro And Combined Severity</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/Pretreatment Severity Quantification_ Ro and Combined Severity/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/Pretreatment Severity Quantification_ Ro and Combined Severity/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/Pretreatment Severity Quantification_ Ro and Combined Severity/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Scale Up Principles For Lignin Removal Reactors  Mixing, Heat, And Rtd</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/Scale-Up Principles for Lignin-Removal Reactors_ Mixing, Heat, and RTD/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/Scale-Up Principles for Lignin-Removal Reactors_ Mixing, Heat, and RTD/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/Scale-Up Principles for Lignin-Removal Reactors_ Mixing, Heat, and RTD/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+                    
+            <div class="lesson-item">
+                <span class="lesson-title">Section Task</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/final_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Section Test</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/06_Kinetics_and_Reactor_Design/test.html" class="btn btn-test">Test</a>
+                </div>
+            </div>
+            
+                </div>
+            </details>
+            
+            <details class="section-container" >
+                <summary class="section-header">
+                    <span>07 Physical Pretreatments</span>
+                </summary>
+                <div class="lesson-list">
+                    
+            <div class="lesson-item">
+                <span class="lesson-title">Afex Pretreatment  Disrupting Lignin Carbohydrate Complexes</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/07_Physical_Pretreatments/AFEX Pretreatment_ Disrupting Lignin-Carbohydrate Complexes/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/07_Physical_Pretreatments/AFEX Pretreatment_ Disrupting Lignin-Carbohydrate Complexes/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/07_Physical_Pretreatments/AFEX Pretreatment_ Disrupting Lignin-Carbohydrate Complexes/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Extrusion Based Pretreatments  Shear Induced Fibrillation And Pore Generation</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/07_Physical_Pretreatments/Extrusion-Based Pretreatments_ Shear-Induced Fibrillation and Pore Generation/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/07_Physical_Pretreatments/Extrusion-Based Pretreatments_ Shear-Induced Fibrillation and Pore Generation/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/07_Physical_Pretreatments/Extrusion-Based Pretreatments_ Shear-Induced Fibrillation and Pore Generation/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Liquid Hot Water Pretreatment  Autohydrolysis Kinetics And Delignification Control</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/07_Physical_Pretreatments/Liquid Hot Water Pretreatment_ Autohydrolysis Kinetics and Delignification Control/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/07_Physical_Pretreatments/Liquid Hot Water Pretreatment_ Autohydrolysis Kinetics and Delignification Control/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/07_Physical_Pretreatments/Liquid Hot Water Pretreatment_ Autohydrolysis Kinetics and Delignification Control/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Steam Explosion  Lignin Redistribution And Cellulose Exposure</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/07_Physical_Pretreatments/Steam Explosion_ Lignin Redistribution and Cellulose Exposure/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/07_Physical_Pretreatments/Steam Explosion_ Lignin Redistribution and Cellulose Exposure/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/07_Physical_Pretreatments/Steam Explosion_ Lignin Redistribution and Cellulose Exposure/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Ultrasound Assisted Pretreatment  Cavitation Driven Delignification And Accessibility</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/07_Physical_Pretreatments/Ultrasound-Assisted Pretreatment_ Cavitation-Driven Delignification and Accessibility/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/07_Physical_Pretreatments/Ultrasound-Assisted Pretreatment_ Cavitation-Driven Delignification and Accessibility/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/07_Physical_Pretreatments/Ultrasound-Assisted Pretreatment_ Cavitation-Driven Delignification and Accessibility/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+                    
+            <div class="lesson-item">
+                <span class="lesson-title">Section Task</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/07_Physical_Pretreatments/final_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Section Test</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/07_Physical_Pretreatments/test.html" class="btn btn-test">Test</a>
+                </div>
+            </div>
+            
+                </div>
+            </details>
+            
+            <details class="section-container" >
+                <summary class="section-header">
+                    <span>08 Process Integration</span>
+                </summary>
+                <div class="lesson-list">
+                    
+            <div class="lesson-item">
+                <span class="lesson-title">Case Studies  Process Integration For Lignin Removal And Cellulose Exposure</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/08_Process_Integration/Case Studies_ Process Integration for Lignin Removal and Cellulose Exposure/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/08_Process_Integration/Case Studies_ Process Integration for Lignin Removal and Cellulose Exposure/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/08_Process_Integration/Case Studies_ Process Integration for Lignin Removal and Cellulose Exposure/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Effluent Control And Ehs Best Practices In Delignification Operations</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/08_Process_Integration/Effluent Control and EHS Best Practices in Delignification Operations/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/08_Process_Integration/Effluent Control and EHS Best Practices in Delignification Operations/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/08_Process_Integration/Effluent Control and EHS Best Practices in Delignification Operations/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Integrated Washing And Neutralization For Enhanced Delignification</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/08_Process_Integration/Integrated Washing and Neutralization for Enhanced Delignification/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/08_Process_Integration/Integrated Washing and Neutralization for Enhanced Delignification/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/08_Process_Integration/Integrated Washing and Neutralization for Enhanced Delignification/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Lignin Recovery And Upgrading  Process Options And Product Portfolios</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/08_Process_Integration/Lignin Recovery and Upgrading_ Process Options and Product Portfolios/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/08_Process_Integration/Lignin Recovery and Upgrading_ Process Options and Product Portfolios/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/08_Process_Integration/Lignin Recovery and Upgrading_ Process Options and Product Portfolios/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Techno Economic Analysis Of Integrated Delignification And Valorization</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/08_Process_Integration/Techno-Economic Analysis of Integrated Delignification and Valorization/lesson.html" class="btn btn-theory">Theory</a><a href="courses/removing_lignin/08_Process_Integration/Techno-Economic Analysis of Integrated Delignification and Valorization/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/removing_lignin/08_Process_Integration/Techno-Economic Analysis of Integrated Delignification and Valorization/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+                    
+            <div class="lesson-item">
+                <span class="lesson-title">Section Task</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/08_Process_Integration/final_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Section Test</span>
+                <div class="btn-group">
+                    <a href="courses/removing_lignin/08_Process_Integration/test.html" class="btn btn-test">Test</a>
+                </div>
+            </div>
+            
+                </div>
+            </details>
+            
+        </div>
+    </div>
+</body>
+</html>

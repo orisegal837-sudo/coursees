@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agentic AI Lesson Module</title>
+
+  <script>
+    // Lightweight, dependency-free Markdown parser (code fences + basic emphasis + headings + lists).
+    // Keeps the page functional even if external marked.js fails to load.
+    window.__simpleMarkdownToHTML = function (md) {
+      const escapeHtml = (s) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c]));
+      const parseInline = (s) => {
+        // code
+        s = s.replace(/`([^`]+)`/g, (m, p1) => `<code>${escapeHtml(p1)}</code>`);
+        // bold
+        s = s.replace(/\*\*([^*]+)\*\*/g, (m, p1) => `<strong>${escapeHtml(p1)}</strong>`);
+        // italic
+        s = s.replace(/\*([^*]+)\*/g, (m, p1) => `<em>${escapeHtml(p1)}</em>`);
+        return s;
+      };
+
+      // Normalize line endings
+      md = (md || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+      const lines = md.split("\n");
+      let i = 0;
+      let html = "";
+      let inCode = false;
+      let codeLang = "";
+      let codeBuf = [];
+
+      const flushParagraph = (buf) => {
+        const text = buf.join(" ").trim();
+        if (!text) return;
+        html += `<p>${parseInline(text)}</p>`;
+      };
+
+      const isHr = (l) => /^\s*---\s*$/.test(l);
+      const isHeading = (l) => /^\s*(#{1,4})\s+/.test(l);
+      const headingLevel = (l) => (l.match(/^\s*(#{1,4})\s+/) || [])[1]?.length || 1;
+      const headingText = (l) => l.replace(/^\s*#{1,4}\s+/, "");
+
+      while (i < lines.length) {
+        const line = lines[i];
+
+        if (line.trim().startsWith("```")) {
+          // Toggle code fence
+          if (!inCode) {
+            inCode = true;
+            codeLang = line.trim().slice(3).trim();
+            codeBuf = [];
+          } else {
+            // end fence
+            inCode = false;
+            const code = escapeHtml(codeBuf.join("\n"));
+            html += `<pre><code>${code}</code></pre>`;
+            codeLang = "";
+            codeBuf = [];
+          }
+          i++;
+          continue;
+        }
+
+        if (inCode) {
+          codeBuf.push(line);
+          i++;
+          continue;
+        }
+
+        if (isHr(line)) {
+          html += `<hr/>`;
+          i++;
+          continue;
+        }
+
+        if (/^\s*-\s+/.test(line) || /^\s*\d+\.\s+/.test(line)) {
+          // Lists
+          const ordered = /^\s*\d+\.\s+/.test(line);
+          let listHtml = ordered ? "<ol>" : "<ul>";
+          while (i < lines.length && (ordered ? /^\s*\d+\.\s+/.test(lines[i]) : /^\s*-\s+/.test(lines[i]))) {
+            let liText = lines[i].replace(ordered ? /^\s*\d+\.\s+/ : /^\s*-\s+/, "");
+            liText = liText.trim();
+            listHtml += `<li>${parseInline(liText)}</li>`;
+            i++;
+          }
+          listHtml += ordered ? "</ol>" : "</ul>";
+          html += listHtml;
+          continue;
+        }
+
+        if (isHeading(line)) {
+          const lvl = Math.max(1, Math.min(4, headingLevel(line)));
+          const txt = parseInline(headingText(line).trim());
+          html += `<h${lvl}>${txt}</h${lvl}>`;
+          i++;
+          continue;
+        }
+
+        if (/^\s*$/.test(line)) {
+          i++;
+          continue;
+        }
+
+        // Paragraph (collect consecutive non-blank lines)
+        const para = [];
+        while (i < lines.length && !/^\s*$/.test(lines[i]) && !isHr(lines[i]) && !lines[i].trim().startsWith("```") && !isHeading(lines[i]) && !/^\s*-\s+/.test(lines[i]) && !/^\s*\d+\.\s+/.test(lines[i])) {
+          para.push(lines[i].trim());
+          i++;
+        }
+        flushParagraph(para);
+      }
+
+      return html;
+    };
+  </script>
+
+  <!-- Optional external dependencies (not required for functionality) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root{
+      --bg: #0b1220;
+      --panel: rgba(255,255,255,.06);
+      --panel-2: rgba(255,255,255,.08);
+      --stroke: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.72);
+      --muted-2: rgba(255,255,255,.62);
+      --accent: #7c3aed;
+      --accent-2: #22d3ee;
+      --shadow: 0 18px 50px rgba(0,0,0,.45);
+      --radius-xl: 22px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    body{
+      margin:0;
+      font-family: var(--sans);
+      background:
+        radial-gradient(1200px 800px at 30% -10%, rgba(124,58,237,.20), transparent 60%),
+        radial-gradient(1000px 680px at 90% 10%, rgba(34,211,238,.14), transparent 55%),
+        linear-gradient(180deg, #060913 0%, #050712 100%);
+      color: var(--text);
+    }
+
+    main{
+      min-height: 100%;
+      display:flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+    }
+
+    section[id]{ width: min(1100px, 100%); }
+
+    .view-shell{
+      color: var(--text);
+      background:
+        radial-gradient(1000px 600px at 10% 0%, rgba(124,58,237,.35), transparent 60%),
+        radial-gradient(900px 520px at 90% 20%, rgba(34,211,238,.22), transparent 55%),
+        linear-gradient(180deg, #0b1220 0%, #070b14 100%);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .view-inner{ padding: clamp(18px, 3.5vw, 34px); }
+
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom: 18px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 8px 12px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing:.2px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 0 4px rgba(124,58,237,.16);
+    }
+
+    .title{
+      margin: 6px 0 6px 0;
+      font-size: clamp(22px, 2.6vw, 34px);
+      line-height: 1.15;
+      letter-spacing: -.02em;
+    }
+    .subtitle{
+      margin: 0;
+      color: var(--muted);
+      font-size: 15.5px;
+      line-height: 1.6;
+      max-width: 78ch;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 16px;
+      margin-top: 18px;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+      .topbar{ flex-direction: column; align-items: stretch; }
+      .chip[aria-label="View ID"]{ align-self:flex-start; }
+    }
+
+    .card{
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius-lg);
+      overflow:hidden;
+    }
+    .card-h{
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .card-h h2{
+      margin:0;
+      font-size: 14px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.86);
+    }
+
+    .chip{
+      font-size: 12px;
+      color: rgba(255,255,255,.78);
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(124,58,237,.10);
+      padding: 6px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .card-b{ padding: 16px; }
+
+    .p{
+      margin: 0 0 12px 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .strong{ color: rgba(255,255,255,.92); font-weight: 650; }
+
+    .rules{
+      margin: 12px 0 0 0;
+      padding: 0;
+      list-style: none;
+      display:grid;
+      gap: 10px;
+    }
+    .rule{
+      display:flex;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: var(--radius-md);
+    }
+    .rule svg{ flex: 0 0 auto; margin-top: 1px; opacity: .95; }
+    .rule b{ color: rgba(255,255,255,.92); }
+    .rule span{ color: var(--muted-2); font-size: 14px; line-height: 1.55; }
+
+    .code{
+      border: 1px solid rgba(34,211,238,.22);
+      background:
+        radial-gradient(800px 300px at 20% 0%, rgba(34,211,238,.10), transparent 65%),
+        linear-gradient(180deg, rgba(8,12,24,.72), rgba(8,12,24,.92));
+      border-radius: var(--radius-lg);
+      overflow:hidden;
+      margin-top: 12px;
+    }
+    .code-h{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.78);
+      font-size: 12.5px;
+    }
+    .code-dots{ display:flex; gap:6px; align-items:center; }
+    .code-dots i{
+      width:10px;height:10px;border-radius:999px; display:inline-block;
+      background: rgba(255,255,255,.22);
+    }
+    .code pre{
+      margin:0;
+      padding: 14px 14px 16px 14px;
+      font-family: var(--mono);
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: rgba(255,255,255,.90);
+      overflow:auto;
+      tab-size: 2;
+    }
+    .kw{ color: #a78bfa; }
+    .cm{ color: rgba(255,255,255,.55); }
+    .st{ color: #67e8f9; }
+    .nu{ color: #fbbf24; }
+
+    .table-wrap{
+      overflow:auto;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+    table{
+      width:100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 640px;
+      color: rgba(255,255,255,.86);
+      font-size: 14px;
+    }
+    thead th{
+      text-align:left;
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.72);
+      background: rgba(255,255,255,.05);
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 1;
+    }
+    tbody td{
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      vertical-align: top;
+      color: rgba(255,255,255,.82);
+    }
+    tbody tr:hover td{ background: rgba(124,58,237,.06); }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      font-family: var(--mono);
+      font-size: 13px;
+      color: rgba(255,255,255,.88);
+      white-space: nowrap;
+    }
+    .pill i{
+      width:8px;height:8px;border-radius:999px; display:inline-block;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      opacity:.95;
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 16px clamp(18px, 3.5vw, 34px);
+      border-top: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      flex-wrap: wrap;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.90);
+      text-decoration:none;
+      font-size: 14px;
+      line-height: 1;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
+      user-select:none;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .btn:hover{
+      background: rgba(255,255,255,.07);
+      border-color: rgba(255,255,255,.18);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(0,0,0,.25);
+    }
+    .btn:focus-visible{
+      outline: 2px solid rgba(34,211,238,.55);
+      outline-offset: 3px;
+    }
+    .btn-primary{
+      border-color: rgba(34,211,238,.30);
+      background: linear-gradient(135deg, rgba(124,58,237,.22), rgba(34,211,238,.16));
+    }
+    .btn[disabled]{
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    .btn svg{ opacity:.9; }
+
+    .sr-only{
+      position:absolute;
+      width:1px;height:1px;
+      padding:0;margin:-1px;
+      overflow:hidden;clip:rect(0,0,0,0);
+      white-space:nowrap;border:0;
+    }
+
+    .split{
+      display:grid;
+      grid-template-columns: 220px minmax(0, 1fr) 220px;
+      gap: 16px;
+      margin-top: 18px;
+      align-items: start;
+    }
+    @media (max-width: 980px){
+      .split{ grid-template-columns: 1fr; }
+    }
+
+    .mini{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .kbd{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.86);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .kbd code{ font-family: var(--mono); color: rgba(255,255,255,.90); }
+
+    .hr{
+      height: 1px;
+      background: rgba(255,255,255,.10);
+      margin: 14px 0;
+      border: 0;
+    }
+
+    .callout{
+      border: 1px solid rgba(124,58,237,.22);
+      background:
+        radial-gradient(800px 260px at 10% 0%, rgba(124,58,237,.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+    }
+    .callout-h{
+      display:flex;
+      align-items:flex-start;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .icon-badge{
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(135deg, rgba(124,58,237,.22), rgba(34,211,238,.12));
+      display:grid;
+      place-items:center;
+      flex: 0 0 auto;
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+    }
+    .callout p{
+      margin: 0;
+      color: rgba(255,255,255,.78);
+      line-height: 1.7;
+      font-size: 14.5px;
+    }
+
+    .prompt{
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.035);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+    }
+    .prompt h3{
+      margin: 0 0 6px 0;
+      font-size: 14px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.86);
+    }
+    .choices{
+      margin: 10px 0 0 0;
+      padding: 0;
+      list-style: none;
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .choice{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.82);
+      font-size: 13.5px;
+      white-space: nowrap;
+    }
+    .choice i{
+      width: 10px; height: 10px; border-radius: 999px; display:inline-block;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 0 4px rgba(34,211,238,.10);
+      opacity: .95;
+    }
+
+    .markdown-content {
+      color: var(--text);
+      line-height: 1.75;
+      font-size: 15.5px;
+    }
+
+    .markdown-content > *:first-child { margin-top: 0; }
+    .markdown-content > *:last-child { margin-bottom: 0; }
+
+    .markdown-content h1,
+    .markdown-content h2,
+    .markdown-content h3,
+    .markdown-content h4 {
+      color: rgba(255,255,255,.96);
+      line-height: 1.2;
+      margin: 1.2em 0 .6em;
+      letter-spacing: -.02em;
+    }
+
+    .markdown-content h2 { font-size: 1.5rem; }
+    .markdown-content h3 { font-size: 1.15rem; }
+
+    .markdown-content p,
+    .markdown-content ul,
+    .markdown-content ol,
+    .markdown-content pre,
+    .markdown-content blockquote,
+    .markdown-content hr {
+      margin: 0 0 1rem 0;
+    }
+
+    .markdown-content strong { color: rgba(255,255,255,.96); }
+    .markdown-content em { color: rgba(255,255,255,.88); }
+
+    .markdown-content ul,
+    .markdown-content ol {
+      padding-left: 1.35rem;
+      color: var(--muted);
+    }
+
+    .markdown-content li { margin: .35rem 0; }
+
+    .markdown-content hr {
+      border: 0;
+      height: 1px;
+      background: rgba(255,255,255,.10);
+    }
+
+    .markdown-content code {
+      font-family: var(--mono);
+      font-size: .92em;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 8px;
+      padding: .15em .4em;
+      color: rgba(255,255,255,.94);
+    }
+
+    .markdown-content pre {
+      border: 1px solid rgba(34,211,238,.22);
+      background:
+        radial-gradient(800px 300px at 20% 0%, rgba(34,211,238,.10), transparent 65%),
+        linear-gradient(180deg, rgba(8,12,24,.72), rgba(8,12,24,.92));
+      border-radius: var(--radius-lg);
+      overflow: auto;
+      padding: 14px;
+    }
+
+    .markdown-content pre code {
+      background: transparent;
+      border: 0;
+      padding: 0;
+      display: block;
+      color: rgba(255,255,255,.90);
+      line-height: 1.65;
+    }
+
+    .markdown-content blockquote {
+      border-left: 3px solid rgba(124,58,237,.5);
+      padding: .25rem 0 .25rem 1rem;
+      color: var(--muted);
+      background: rgba(255,255,255,.03);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    }
+
+    .side-meta { position: sticky; top: 22px; }
+
+    .transition-opacity { transition: opacity 300ms ease; }
+    .duration-300 { transition-duration: 300ms; }
+    .opacity-100 { opacity: 1; }
+    .opacity-0 { opacity: 0; }
+    .block { display: block; }
+    .hidden { display: none !important; }
+
+    @media (prefers-reduced-motion: reduce){
+      .transition-opacity{ transition: none !important; }
+      .btn{ transition: none !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <textarea id="markdown-source" style="display:none;">{"parts":[{"id":"page_1","content":"Welcome to the frontier of **Agentic AI**. \n\nIn 2026, we’ve moved past the \"Chatbot Era.\" We no longer just ask an AI to write a poem; we ask it to \"research this competitor, draft a counter-strategy, and email the marketing team.\" That shift from *answering* to *acting* is what defines an **Agent**.\n\nIn this lesson, we’ll break down how to build these autonomous systems using Python.\n\n---\n\n## 1. The Core Concept: Brain vs. Hands\nTraditional AI is a **linear pipeline**: Input $\\rightarrow$ LLM $\\rightarrow$ Output.\n**Agentic AI** is a **loop**. The AI doesn't just talk; it reasons about a goal, chooses a tool, observes the result, and iterates until the job is done.\n\n\n\n### The Four Pillars of an Agent:\n1.  **Reasoning (The Brain):** The LLM deciding *what* to do.\n2.  **Tools (The Hands):** Python functions the agent can call (APIs, databases, web search).\n3.  **Memory (The Notebook):** Short-term context (what happened 5 seconds ago) and long-term state.\n4.  **Planning (The Roadmap):** Breaking a big goal (e.g., \"Plan a trip\") into sub-tasks.","position":"first"},{"id":"page_2","content":"## 2. Setting Up Your Environment\nIn 2026, the industry has coalesced around frameworks that prioritize **type safety** and **controllability**. We’ll use `pydantic-ai` for its strict schema validation and `LangGraph` for workflow management.\n\n```bash\npip install pydantic-ai langgraph openai\n```","position":"middle"},{"id":"page_3","content":"## 3. Building Your First Agent\nLet’s build a **Code Investigator Agent**. Its goal is to read a local Python file, find a bug, and suggest a fix using a tool.\n\n### Step 1: Define the Tools\nTools are just regular Python functions decorated so the AI knows how to use them.\n\n```python\nfrom pydantic_ai import Agent, RunContext\nimport os\n\n# This is our 'Hand' - a tool to read files\ndef read_local_file(ctx: RunContext[str], filename: str) -> str:\n    \"\"Reads a file from the local directory.\"\"\n    with open(filename, 'r') as f:\n        return f.read()\n\n# Step 2: Initialize the Agent\n# We give it a 'system prompt' (its personality/mission)\nagent = Agent(\n    'openai:gpt-4o', # Or your 2026 model of choice\n    system_prompt=\"You are a senior QA engineer. Use your tools to find bugs.\",\n    tools=[read_local_file]\n)\n```\n\n### Step 2: The Execution Loop\nWhen you run this, the Agent doesn't just guess. It calls `read_local_file`, looks at the code, and then provides a final answer.\n\n```python\nasync def main():\n    result = await agent.run(\"Check 'app.py' for any potential security risks.\")\n    print(f\"Agent's Analysis: {result.data}\")\n\n# Logic: \n# 1. Agent thinks: \"I need to see app.py first.\"\n# 2. Agent calls: read_local_file(filename=\"app.py\")\n# 3. Agent receives: \"print(os.getenv('SECRET_KEY'))\"\n# 4. Agent concludes: \"You are leaking your secret key to stdout!\"\n```\n\n---\n\n## 4. Multi-Agent Orchestration\nReal-world tasks are usually too big for one agent. In 2026, we use **Multi-Agent Systems (MAS)**. Think of it like a corporate hierarchy: a **Supervisor Agent** delegates tasks to **Worker Agents**.\n\n\n\n### Common Patterns:\n* **The Router:** One agent decides which specialist (e.g., \"Coder\" or \"Writer\") should handle the prompt.\n* **The Orchestrator-Worker:** A lead agent breaks a task into pieces and waits for workers to report back.\n* **The Swarm:** Agents work in parallel on a shared \"state\" (like a shared document).","position":"middle"},{"id":"page_4","content":"## 5. Why Most Agents Fail (and how to fix it)\nBuilding agents is easy; building *reliable* agents is hard. Here are the \"Golden Rules\" for 2026:\n\n1.  **Human-in-the-Loop (HITL):** Never let an agent spend \\$1,000$ on AWS or delete a database without a \"confirm\" button.\n2.  **Observability:** Use tools like *LangSmith* or *Phoenix* to trace every \"thought\" the agent had. If it failed, was it because the tool returned garbage or the LLM hallucinated?\n3.  **Strict Schemas:** Always use Pydantic models for tool inputs. If the agent tries to pass a string where a number is required, the system should catch it before the tool even runs.\n\n---\n\n### Quick Check-In\nBuilding your first agent feels a bit like giving a toddler a chainsaw—exciting but nerve-wracking! Which part of the agentic loop sounds the most challenging to implement for your specific project: the reasoning, the tool integration, or managing the state?","position":"last"}]}</textarea>
+
+  <main>
+    <section id="lesson-app" class="w-full">
+      <div class="view-shell">
+        <div id="sections-root">
+          <article id="section-0" class="transition-opacity duration-300 opacity-0 hidden" data-index="0">
+            <div class="view-inner">
+              <div class="topbar">
+                <div>
+                  <div class="badge"><span class="dot"></span><span>Lesson Module</span></div>
+                  <h1 class="title">Agentic AI with Python</h1>
+                  <p class="subtitle">Move through each lesson section using the navigation controls below.</p>
+                </div>
+                <div class="chip" aria-label="View ID">Section <span id="mobile-section-label-0">1</span> / 4</div>
+              </div>
+
+              <div class="split">
+                <aside class="side-meta">
+                  <div class="card">
+                    <div class="card-h">
+                      <h2>Metadata</h2>
+                    </div>
+                    <div class="card-b">
+                      <div class="mini">
+                        <span class="kbd">ID <code>page_1</code></span>
+                        <span class="kbd">Position <code>first</code></span>
+                        <span class="kbd">Number <code>1</code></span>
+                      </div>
+                    </div>
+                  </div>
+                </aside>
+
+                <div class="card">
+                  <div class="card-h">
+                    <h2>Lesson Content</h2>
+                    <span class="chip">Primary Focus</span>
+                  </div>
+                  <div class="card-b">
+                    <div id="content-0" class="markdown-content"></div>
+                  </div>
+                </div>
+
+                <aside class="side-meta">
+                  <div class="callout">
+                    <div class="callout-h">
+                      <div class="icon-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M12 6v6l4 2m5-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p>Section metadata stays in the margins so the lesson text remains central and easy to read.</p>
+                      </div>
+                    </div>
+                  </div>
+                </aside>
+              </div>
+            </div>
+          </article>
+
+          <article id="section-1" class="transition-opacity duration-300 opacity-0 hidden" data-index="1">
+            <div class="view-inner">
+              <div class="topbar">
+                <div>
+                  <div class="badge"><span class="dot"></span><span>Lesson Module</span></div>
+                  <h1 class="title">Agentic AI with Python</h1>
+                  <p class="subtitle">Move through each lesson section using the navigation controls below.</p>
+                </div>
+                <div class="chip" aria-label="View ID">Section <span id="mobile-section-label-1">2</span> / 4</div>
+              </div>
+
+              <div class="split">
+                <aside class="side-meta">
+                  <div class="card">
+                    <div class="card-h">
+                      <h2>Metadata</h2>
+                    </div>
+                    <div class="card-b">
+                      <div class="mini">
+                        <span class="kbd">ID <code>page_2</code></span>
+                        <span class="kbd">Position <code>middle</code></span>
+                        <span class="kbd">Number <code>2</code></span>
+                      </div>
+                    </div>
+                  </div>
+                </aside>
+
+                <div class="card">
+                  <div class="card-h">
+                    <h2>Lesson Content</h2>
+                    <span class="chip">Primary Focus</span>
+                  </div>
+                  <div class="card-b">
+                    <div id="content-1" class="markdown-content"></div>
+                  </div>
+                </div>
+
+                <aside class="side-meta">
+                  <div class="callout">
+                    <div class="callout-h">
+                      <div class="icon-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p>Use the navigation buttons to move section by section with smooth fade transitions.</p>
+                      </div>
+                    </div>
+                  </div>
+                </aside>
+              </div>
+            </div>
+          </article>
+
+          <article id="section-2" class="transition-opacity duration-300 opacity-0 hidden" data-index="2">
+            <div class="view-inner">
+              <div class="topbar">
+                <div>
+                  <div class="badge"><span class="dot"></span><span>Lesson Module</span></div>
+                  <h1 class="title">Agentic AI with Python</h1>
+                  <p class="subtitle">Move through each lesson section using the navigation controls below.</p>
+                </div>
+                <div class="chip" aria-label="View ID">Section <span id="mobile-section-label-2">3</span> / 4</div>
+              </div>
+
+              <div class="split">
+                <aside class="side-meta">
+                  <div class="card">
+                    <div class="card-h">
+                      <h2>Metadata</h2>
+                    </div>
+                    <div class="card-b">
+                      <div class="mini">
+                        <span class="kbd">ID <code>page_3</code></span>
+                        <span class="kbd">Position <code>middle</code></span>
+                        <span class="kbd">Number <code>3</code></span>
+                      </div>
+                    </div>
+                  </div>
+                </aside>
+
+                <div class="card">
+                  <div class="card-h">
+                    <h2>Lesson Content</h2>
+                    <span class="chip">Primary Focus</span>
+                  </div>
+                  <div class="card-b">
+                    <div id="content-2" class="markdown-content"></div>
+                  </div>
+                </div>
+
+                <aside class="side-meta">
+                  <div class="callout">
+                    <div class="callout-h">
+                      <div class="icon-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M9.75 17L15 12l-5.25-5" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p>Each section is rendered from raw Markdown using Marked.js, without altering the original lesson text.</p>
+                      </div>
+                    </div>
+                  </div>
+                </aside>
+              </div>
+            </div>
+          </article>
+
+          <article id="section-3" class="transition-opacity duration-300 opacity-0 hidden" data-index="3">
+            <div class="view-inner">
+              <div class="topbar">
+                <div>
+                  <div class="badge"><span class="dot"></span><span>Lesson Module</span></div>
+                  <h1 class="title">Agentic AI with Python</h1>
+                  <p class="subtitle">Move through each lesson section using the navigation controls below.</p>
+                </div>
+                <div class="chip" aria-label="View ID">Section <span id="mobile-section-label-3">4</span> / 4</div>
+              </div>
+
+              <div class="split">
+                <aside class="side-meta">
+                  <div class="card">
+                    <div class="card-h">
+                      <h2>Metadata</h2>
+                    </div>
+                    <div class="card-b">
+                      <div class="mini">
+                        <span class="kbd">ID <code>page_4</code></span>
+                        <span class="kbd">Position <code>last</code></span>
+                        <span class="kbd">Number <code>4</code></span>
+                      </div>
+                    </div>
+                  </div>
+                </aside>
+
+                <div class="card">
+                  <div class="card-h">
+                    <h2>Lesson Content</h2>
+                    <span class="chip">Primary Focus</span>
+                  </div>
+                  <div class="card-b">
+                    <div id="content-3" class="markdown-content"></div>
+                  </div>
+                </div>
+
+                <aside class="side-meta">
+                  <div class="callout">
+                    <div class="callout-h">
+                      <div class="icon-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p>Use this final section to reflect on which part of the agentic loop is most challenging for your project.</p>
+                      </div>
+                    </div>
+                  </div>
+                </aside>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="nav">
+          <div class="badge" id="progress-indicator"><span class="dot"></span><span>Page 1 of 4</span></div>
+          <div class="flex items-center gap-3">
+            <button id="prevBtn" class="btn" type="button" aria-label="Previous section">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 19l-7-7 7-7" />
+              </svg>
+              Previous
+            </button>
+            <button id="nextBtn" class="btn btn-primary" type="button" aria-label="Next section">
+              Next
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const sourceEl = document.getElementById('markdown-source');
+      const root = document.getElementById('sections-root');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const progressIndicator = document.getElementById('progress-indicator');
+
+      const progressTextNode = progressIndicator ? progressIndicator.querySelector('span:last-child') : null;
+
+      const sections = Array.from(root ? root.querySelectorAll('article[id^="section-"]') : []);
+      let currentIndex = 0;
+      let isTransitioning = false;
+
+      let parts = [];
+      try {
+        const source = sourceEl ? sourceEl.value : '';
+        const parsed = JSON.parse(source);
+        parts = parsed && Array.isArray(parsed.parts) ? parsed.parts : [];
+      } catch (e) {
+        parts = [];
+      }
+
+      const renderMarkdown = (md) => {
+        // Use marked if available, otherwise fallback.
+        try {
+          if (window.marked && typeof window.marked.parse === 'function') {
+            window.marked.setOptions({ gfm: true, breaks: false });
+            return window.marked.parse(md || '');
+          }
+        } catch (_) {}
+        if (window.__simpleMarkdownToHTML) return window.__simpleMarkdownToHTML(md || '');
+        // ultimate fallback: plain text
+        const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c]));
+        return `<p>${esc(md || '')}</p>`;
+      };
+
+      // Render contents
+      sections.forEach((sectionEl, index) => {
+        const target = document.getElementById('content-' + index);
+        const part = parts[index];
+        const content = part && typeof part.content === 'string' ? part.content : '';
+        if (target) target.innerHTML = renderMarkdown(content);
+      });
+
+      function updateNav(index) {
+        if (progressTextNode) progressTextNode.textContent = 'Page ' + (index + 1) + ' of ' + sections.length;
+        if (prevBtn) prevBtn.disabled = index === 0;
+        if (nextBtn) nextBtn.disabled = index === sections.length - 1;
+      }
+
+      function showSection(index) {
+        if (!sections.length) return;
+        if (index < 0 || index >= sections.length) return;
+        if (isTransitioning) return;
+
+        isTransitioning = true;
+
+        const currentSection = sections[currentIndex];
+        const nextSection = sections[index];
+
+        if (!currentSection || !nextSection || currentSection === nextSection) {
+          // Ensure current visibility
+          if (currentSection) {
+            currentSection.classList.remove('hidden', 'opacity-0');
+            currentSection.classList.add('opacity-100');
+          }
+          updateNav(index);
+          isTransitioning = false;
+          return;
+        }
+
+        currentSection.classList.add('opacity-0');
+
+        // Match original transition duration (300ms)
+        window.setTimeout(() => {
+          currentSection.classList.add('hidden');
+          currentSection.classList.remove('opacity-100');
+          currentSection.classList.remove('opacity-0');
+
+          nextSection.classList.remove('hidden');
+          requestAnimationFrame(() => {
+            nextSection.classList.remove('opacity-0');
+            nextSection.classList.add('opacity-100');
+          });
+
+          currentIndex = index;
+          updateNav(currentIndex);
+
+          window.setTimeout(() => {
+            isTransitioning = false;
+          }, 300);
+        }, 300);
+      }
+
+      if (prevBtn) prevBtn.addEventListener('click', function () { showSection(currentIndex - 1); });
+      if (nextBtn) nextBtn.addEventListener('click', function () { showSection(currentIndex + 1); });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowLeft') showSection(currentIndex - 1);
+        else if (e.key === 'ArrowRight') showSection(currentIndex + 1);
+      });
+
+      // Initialize first visible section
+      sections.forEach((section, index) => {
+        if (index === 0) {
+          section.classList.remove('hidden', 'opacity-0');
+          section.classList.add('opacity-100');
+        } else {
+          section.classList.add('hidden');
+          section.classList.add('opacity-0');
+          section.classList.remove('opacity-100');
+        }
+      });
+
+      updateNav(0);
+    })();
+  </script>
+</body>
+</html>

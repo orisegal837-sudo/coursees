@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson Module - Agent Task Suites and Evaluation Rubrics</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked-katex-extension/lib/index.umd.js"></script>
+
+  <script>
+    // Minimal Tailwind shim (used only if CDN fails). This keeps the page functional without external deps.
+    (function(){
+      var ok = true;
+      try{
+        if(!window.tailwind) ok = false;
+      }catch(e){ ok = false; }
+    })();
+  </script>
+  <style>
+    /* ========================================
+      PREMIUM THEME & TYPOGRAPHY VARIABLES
+      ========================================
+    */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root{
+      --bg-base: #05050a;
+      --bg-surface: rgba(17, 18, 28, 0.65);
+      --bg-surface-hover: rgba(255, 255, 255, 0.05);
+      
+      --stroke-soft: rgba(255, 255, 255, 0.08);
+      --stroke-strong: rgba(255, 255, 255, 0.15);
+      
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-heading: #ffffff;
+      
+      --accent-primary: #8b5cf6;
+      --accent-secondary: #3b82f6;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      
+      --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --shadow-glow: 0 0 40px rgba(139, 92, 246, 0.15);
+      
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      
+      --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      
+      /* New Wider Content Width */
+      --content-max-width: 1200px; 
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      /* Dynamic ambient background */
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.08), transparent 40%),
+        radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.08), transparent 40%);
+      background-attachment: fixed;
+    }
+
+    /* ========================================
+      LAYOUT & SHELL
+      ========================================
+    */
+    main {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .view-shell {
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    
+    .view-inner {
+      padding: clamp(20px, 4vw, 48px) 24px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ========================================
+      TOP HEADER & TYPOGRAPHY
+      ========================================
+    */
+    .topbar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+      margin-bottom: 40px;
+      width: 100%;
+      max-width: var(--content-max-width);
+      animation: fadeDown 0.6s ease-out;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border: 1px solid var(--stroke-strong);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 999px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent-gradient);
+      box-shadow: 0 0 8px var(--accent-primary);
+    }
+
+    .title {
+      margin: 8px 0 0 0;
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--text-heading);
+      background: linear-gradient(to right, #ffffff, #a5b4fc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: clamp(16px, 1.5vw, 18px);
+      line-height: 1.6;
+      max-width: 60ch;
+    }
+
+    /* ========================================
+      MAIN CARD (WIDER VIEWPORT)
+      ========================================
+    */
+    .grid {
+      display: flex;
+      width: 100%;
+      justify-content: center;
+      flex-grow: 1;
+    }
+
+    .card {
+      width: 100%;
+      max-width: var(--content-max-width);
+      border: 1px solid var(--stroke-soft);
+      background: var(--bg-surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-soft), var(--shadow-glow);
+    }
+
+    .card-h {
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--stroke-soft);
+      background: rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-h h2 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .card-b {
+      padding: clamp(24px, 5vw, 56px);
+      flex-grow: 1;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #c4b5fd;
+    }
+
+    /* ========================================
+      NAVIGATION BOTTOM BAR
+      ========================================
+    */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 24px;
+      border-top: 1px solid var(--stroke-soft);
+      background: rgba(5, 5, 10, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 14px 28px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke-strong);
+      background: var(--bg-surface);
+      color: var(--text-heading);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--bg-surface-hover);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      border: none;
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #9f7aea, #60a5fa);
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ========================================
+      ENHANCED MARKDOWN TYPOGRAPHY
+      ========================================
+    */
+    .markdown-body {
+      max-width: 100%;
+      margin: 0 auto;
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--text-main);
+    }
+
+    .markdown-body h1, 
+    .markdown-body h2, 
+    .markdown-body h3 {
+      color: var(--text-heading);
+      font-weight: 600;
+      margin-top: 2em;
+      margin-bottom: 0.75em;
+      line-height: 1.3;
+    }
+
+    .markdown-body h1 { 
+      font-size: 2.25em; 
+      letter-spacing: -0.02em;
+    }
+    
+    .markdown-body h2 { 
+      font-size: 1.75em; 
+      letter-spacing: -0.01em;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid var(--stroke-soft);
+    }
+    
+    .markdown-body h3 { 
+      font-size: 1.35em; 
+      color: #e2e8f0;
+    }
+
+    /* Eliminate top margin for the very first element to align with padding */
+    .markdown-body > *:first-child { margin-top: 0; }
+
+    .markdown-body p {
+      margin-top: 0;
+      margin-bottom: 1.25em;
+    }
+
+    .markdown-body ul, 
+    .markdown-body ol {
+      margin-top: 0;
+      margin-bottom: 1.5em;
+      padding-left: 1.5em;
+    }
+
+    .markdown-body li {
+      margin-bottom: 0.5em;
+    }
+
+    .markdown-body li > ul, 
+    .markdown-body li > ol {
+      margin-top: 0.5em;
+    }
+
+    .markdown-body strong {
+      color: var(--text-heading);
+      font-weight: 600;
+    }
+
+    .markdown-body a {
+      color: var(--accent-secondary);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    .markdown-body a:hover {
+      border-bottom-color: var(--accent-secondary);
+    }
+
+    .markdown-body code {
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.2em 0.4em;
+      border-radius: 6px;
+      font-size: 0.9em;
+      color: #93c5fd; /* Light blue tint for inline code */
+    }
+
+    .markdown-body pre {
+      background: #0d1117;
+      border: 1px solid var(--stroke-soft);
+      border-radius: var(--radius-md);
+      padding: 1.25em;
+      overflow-x: auto;
+      margin-bottom: 1.5em;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .markdown-body pre code {
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      color: #e2e8f0;
+      font-size: 0.9em;
+      line-height: 1.6;
+    }
+
+    .markdown-body blockquote {
+      margin: 0 0 1.5em 0;
+      padding: 0.5em 0 0.5em 1.5em;
+      border-left: 4px solid var(--accent-primary);
+      color: var(--text-muted);
+      background: linear-gradient(to right, rgba(139, 92, 246, 0.05), transparent);
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+
+    .markdown-body blockquote p:last-child {
+      margin-bottom: 0;
+    }
+
+    .markdown-body hr {
+      border: none;
+      height: 1px;
+      background: var(--stroke-strong);
+      margin: 3em 0;
+    }
+
+    /* ========================================
+      TASK CARD STYLES (STRUCTURED CARDS)
+      ========================================
+    */
+    .task-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .task-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--stroke-soft);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .task-card:hover {
+      border-color: var(--stroke-strong);
+      transform: translateY(-2px);
+    }
+    .task-card h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.25em;
+      color: var(--accent-secondary);
+    }
+    .objective-card {
+      border-left: 4px solid var(--accent-primary);
+    }
+    .instructions-list {
+      padding-left: 20px;
+    }
+    .instructions-list li {
+      margin-bottom: 12px;
+    }
+    .criteria-checklist {
+      list-style: none;
+      padding-left: 0;
+    }
+    .criteria-checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .criteria-checklist li::before {
+      content: "✓";
+      color: #10b981;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* KaTeX overrides for dark mode */
+    .katex {
+      color: var(--text-heading);
+      font-size: 1.1em;
+    }
+
+    /* ========================================
+      TRANSITIONS & ANIMATIONS
+      ========================================
+    */
+    .transition-opacity { transition: opacity 400ms ease, transform 400ms ease; }
+    .opacity-100 { opacity: 1; transform: translateY(0); }
+    .opacity-0 { opacity: 0; transform: translateY(10px); }
+    .hidden { display: none !important; }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .transition-opacity { transition: none !important; }
+      .btn { transition: none !important; }
+      .topbar { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <textarea id="markdown-source" style="display:none;">
+    [
+  {
+    "id": "guide_page_1",
+    "content": "# Page 1 \u2014 Objective and Prerequisites\n\n## Objective\nBuild and analyze **multi-qubit quantum states** by:\n1. Constructing joint state spaces with **tensor products**.\n2. Detecting whether a 2-qubit state is a **product state** or **entangled**.\n3. Using the **Schmidt decomposition** to rewrite any bipartite pure state in a clean canonical form.\n\nBy the end, you should be able to take a 2-qubit state written in amplitudes, test separability, and identify its Schmidt rank and entanglement structure.\n\n## Prerequisites\nYou only need technical tools that let you do vector/matrix calculations:\n- **Python 3.10+**\n- **NumPy** (`pip install numpy`)\n- Optional but useful: **SciPy** (`pip install scipy`) for SVD-based decomposition\n- Optional notebook environment: **JupyterLab** or **Google Colab**\n\n## What you should be able to represent\n- Single-qubit states as 2D complex vectors, e.g. `np.array([a, b], dtype=complex)`\n- Two-qubit states as 4D complex vectors in the basis:\n  - `|00>`, `|01>`, `|10>`, `|11>`\n- Tensor products using `np.kron`\n\n## Practical setup check\n- Confirm you can compute `np.kron([1,0], [0,1])`\n- Confirm you can compute an SVD with `np.linalg.svd`\n- Confirm you can reshape a 4-vector into a `2 x 2` matrix\n\n## Example target\nYou should be able to input this state:\n\\[\n|\\psi\\rangle = \\frac{1}{\\sqrt{2}}(|00\\rangle + |11\\rangle)\n\\]\nand verify that it is entangled and has Schmidt rank 2."
+  },
+  {
+    "id": "guide_page_2",
+    "content": "# Page 2 \u2014 Build Multi-Qubit State Spaces with Tensor Products\n\n## Step 1: Encode single-qubit states as vectors\n**Action:** Write qubit basis states and superpositions as 2-component vectors.\n\n**Why:** Tensor products operate on vectors, so you need the correct vector representation first.\n\n**How (Example):**\n```python\nimport numpy as np\n\nzero = np.array([1, 0], dtype=complex)  # |0>\none = np.array([0, 1], dtype=complex)   # |1>\npsi = (1/np.sqrt(2)) * zero + (1/np.sqrt(2)) * one\n```\n\n## Step 2: Combine qubits with the tensor product\n**Action:** Use the Kronecker product to build joint states.\n\n**Why:** `np.kron` produces the full joint amplitude vector in the correct basis order.\n\n**How (Example):**\n```python\nstate_01 = np.kron(zero, one)\nprint(state_01)  # [0, 1, 0, 0] = |01>\n```\n\n## Step 3: Verify basis ordering for two qubits\n**Action:** Map each 4D vector entry to `|00>`, `|01>`, `|10>`, `|11>`.\n\n**Why:** Misreading basis order is the most common source of errors.\n\n**How (Example):**\n```python\nbasis = {\n    \"|00>\": np.kron(zero, zero),\n    \"|01>\": np.kron(zero, one),\n    \"|10>\": np.kron(one, zero),\n    \"|11>\": np.kron(one, one),\n}\n```\n\n## Step 4: Construct a general 2-qubit state\n**Action:** Represent any 2-qubit pure state as a linear combination of the four basis vectors.\n\n**Why:** This is the standard form used for simulation, analysis, and entanglement checks.\n\n**How (Example):**\n```python\na, b, c, d = 0.5, 0.5, 0.5, 0.5\nstate = np.array([a, b, c, d], dtype=complex)\n```\n\n## Step 5: Build an n-qubit state by repeated tensoring\n**Action:** Use `np.kron` repeatedly to create larger systems.\n\n**Why:** Each added qubit doubles the dimension of the state space.\n\n**How (Example):**\n```python\ntwo_qubits = np.kron(zero, zero)\nthree_qubits = np.kron(np.kron(zero, one), zero)\n```\n\n## Step 6: Sanity-check the dimension\n**Action:** Verify that an n-qubit state has length `2**n`.\n\n**Why:** This confirms your tensor-product construction is consistent.\n\n**How (Example):**\n```python\nn = 3\nassert len(three_qubits) == 2**n\n```"
+  },
+  {
+    "id": "guide_page_3",
+    "content": "# Page 3 \u2014 Detect Product States and Identify Entanglement\n\n## Step 1: Test whether a 2-qubit state factors\n**Action:** For a state\n\\[\n|\\psi\\rangle = a|00\\rangle + b|01\\rangle + c|10\\rangle + d|11\\rangle,\n\\]\ncheck whether `ad == bc`.\n\n**Why:** For two qubits, this is a fast separability test: if the condition fails, the state is entangled.\n\n**How (Example):**\n```python\na, b, c, d = 1, 2, 3, 6\nprint(a*d == b*c)  # True -> product state candidate\n```\n\n## Step 2: Use the determinant viewpoint\n**Action:** Reshape the 4 amplitudes into a `2 x 2` matrix and compute its determinant.\n\n**Why:** A product state corresponds to a rank-1 matrix, which has determinant 0.\n\n**How (Example):**\n```python\nM = np.array([[a, b], [c, d]], dtype=complex)\nprint(np.linalg.det(M))\n```\nIf the determinant is nonzero, the state is entangled.\n\n## Step 3: Check the Bell state explicitly\n**Action:** Encode \\(|\\Phi^+\\rangle = (|00\\rangle + |11\\rangle)/\\sqrt{2}\\) and test it.\n\n**Why:** This is the standard reference example of maximal entanglement.\n\n**How (Example):**\n```python\nbell = (1/np.sqrt(2)) * np.array([1, 0, 0, 1], dtype=complex)\na, b, c, d = bell\nprint(a*d == b*c)  # False\n```\n\n## Step 4: Interpret measurement correlations\n**Action:** Relate the vector structure to outcomes in the computational basis.\n\n**Why:** Entanglement shows up as correlations that cannot be explained by independent qubit states.\n\n**How (Example):**\n- For `|00>` and `|11>` terms only, measuring one qubit immediately predicts the other.\n- In the Bell state, outcomes `00` and `11` appear with equal probability.\n\n## Step 5: Build a reusable separability checker\n**Action:** Write a function that detects whether a 2-qubit state is separable.\n\n**Why:** You will use this repeatedly when analyzing states.\n\n**How (Example):**\n```python\ndef is_product_state(state):\n    a, b, c, d = state\n    return np.isclose(a*d, b*c)\n```\n\n## Step 6: Apply the checker to several states\n**Action:** Test basis states, superposition product states, and Bell states.\n\n**Why:** Comparing examples helps you develop intuition for entanglement.\n\n**How (Example):**\n```python\nprint(is_product_state(np.array([1,0,0,0], dtype=complex)))  # True\nprint(is_product_state(bell))                                 # False\n```"
+  },
+  {
+    "id": "guide_page_4",
+    "content": "# Page 4 \u2014 Compute the Schmidt Decomposition\n\n## Step 1: Reshape the bipartite state into a matrix\n**Action:** Turn a 2-qubit state vector into a `2 x 2` matrix.\n\n**Why:** Schmidt decomposition is obtained from the singular values of this matrix.\n\n**How (Example):**\n```python\ndef state_to_matrix(state):\n    return np.array([[state[0], state[1]],\n                     [state[2], state[3]]], dtype=complex)\n```\n\n## Step 2: Run singular value decomposition\n**Action:** Apply SVD to the matrix representation.\n\n**Why:** The singular values are the Schmidt coefficients.\n\n**How (Example):**\n```python\nU, S, Vh = np.linalg.svd(state_to_matrix(bell))\nprint(S)\n```\n\n## Step 3: Interpret the Schmidt coefficients\n**Action:** Count how many singular values are nonzero.\n\n**Why:** The number of nonzero Schmidt coefficients is the Schmidt rank.\n\n**How (Example):**\n- One nonzero coefficient: separable/product state\n- Two or more nonzero coefficients: entangled state\n\n## Step 4: Reconstruct the Schmidt form\n**Action:** Use the SVD outputs to express the state as matched basis pairs.\n\n**Why:** This gives the canonical decomposition of a bipartite pure state.\n\n**How (Example):**\nFor the Bell state, the Schmidt form is already:\n\\[\n\\frac{1}{\\sqrt{2}}|0\\rangle\\otimes|0\\rangle + \\frac{1}{\\sqrt{2}}|1\\rangle\\otimes|1\\rangle\n\\]\n\n## Step 5: Classify the state from the Schmidt rank\n**Action:** Label the state as separable or entangled based on the rank.\n\n**Why:** This is the cleanest practical classification rule for bipartite pure states.\n\n**How (Example):**\n```python\ndef schmidt_rank(state, tol=1e-10):\n    S = np.linalg.svd(state_to_matrix(state), compute_uv=False)\n    return np.sum(S > tol)\n```\n\n## Step 6: Use the result in practice\n**Action:** Build a small workflow: tensor product -> state vector -> separability test -> Schmidt rank.\n\n**Why:** This turns the theory into a repeatable analysis pipeline.\n\n**How (Example):**\n1. Define two qubit vectors.\n2. Compute `np.kron(u, v)`.\n3. Compare against a known 2-qubit state.\n4. Run `is_product_state` or `schmidt_rank`.\n\n## Final takeaway\n- **Tensor products** build the multi-qubit state space.\n- **Product states** factor into independent qubits.\n- **Entangled states** do not factor.\n- **Schmidt decomposition** gives the standard form for bipartite pure states and makes entanglement classification straightforward."
+  }
+]
+  </textarea>
+
+  <main>
+    <section id="lesson-app" style="width: 100%;">
+      <div class="view-shell">
+        <div class="view-inner">
+          <div class="topbar">
+            <div class="badge">
+              <span class="dot"></span>
+              <span>Practical Guide</span>
+            </div>
+            <h1 class="title">Practical Guide</h1>
+            <p class="subtitle">A step-by-step walkthrough of the implementation.</p>
+          </div>
+
+          <div class="grid">
+            <div class="card">
+              <div class="card-b">
+                <div id="sections-wrapper">
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav">
+          <button type="button" class="btn" id="prevBtn" aria-label="Previous section">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Previous</span>
+          </button>
+          <button type="button" class="btn btn-primary" id="nextBtn" aria-label="Next section">
+            <span>Continue to Next</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  (function () {
+  // ==========================================
+  // 1. HELPER FUNCTIONS
+  // ==========================================
+
+  function escapeHtml(s){
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function simpleMarkdownToHtml(md){
+    var lines = String(md || '').replace(/\r\n/g, '\n').split('\n');
+    var html = [];
+    var inCodeFence = false;
+    var codeLang = '';
+    var codeBuf = [];
+
+    function flushCode(){
+      if(!codeBuf.length) return;
+      var code = escapeHtml(codeBuf.join('\n'));
+      html.push('<pre><code' + (codeLang ? ' class="language-' + escapeHtml(codeLang) + '"' : '') + '>' + code + '</code></pre>');
+      codeBuf = [];
+      codeLang = '';
+    }
+
+    for(var i=0;i<lines.length;i++){
+      var line = lines[i];
+
+      var fenceMatch = line.match(/^\s*```(\w+)?\s*$/);
+      if(fenceMatch){
+        if(!inCodeFence){
+          inCodeFence = true;
+          codeLang = fenceMatch[1] || '';
+          codeBuf = [];
+        } else {
+          inCodeFence = false;
+          flushCode();
+        }
+        continue;
+      }
+
+      if(inCodeFence){
+        codeBuf.push(line);
+        continue;
+      }
+
+      if(/^\s*---\s*$/.test(line)){
+        html.push('<hr/>');
+        continue;
+      }
+
+      var headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+      if(headingMatch){
+        var level = headingMatch[1].length;
+        var text = headingMatch[2].trim();
+        html.push('<h' + level + '>' + renderInline(text) + '</h' + level + '>');
+        continue;
+      }
+
+      var ulMatch = line.match(/^\s*-\s+(.*)$/);
+      if(ulMatch){
+        var items = [];
+        while(i < lines.length && (m = lines[i].match(/^\s*-\s+(.*)$/))){
+          items.push('<li>' + renderInline(m[1].trim()) + '</li>');
+          i++;
+        }
+        i--;
+        html.push('<ul>' + items.join('') + '</ul>');
+        continue;
+      }
+
+      if(line.trim() === ''){
+        continue;
+      }
+
+      html.push('<p>' + renderInline(line.trim()) + '</p>');
+    }
+
+    flushCode();
+    return html.join('');
+
+    function renderInline(text){
+      var out = escapeHtml(text);
+      out = out.replace(/`([^`]+)`/g, function(_, code){ return '<code>' + code + '</code>'; });
+      out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      return out;
+    }
+  }
+
+  // ==========================================
+  // 2. DATA EXTRACTION & DYNAMIC PAGE CREATION
+  // ==========================================
+
+  var rawEl = document.getElementById('markdown-source');
+  var raw = rawEl ? rawEl.value : '[]';
+
+  var lessonParts;
+  try {
+    var parsedData = JSON.parse(raw.trim());
+    // UPDATED LOGIC: Handle both a direct array or the `{ parts: [...] }` object structure
+    lessonParts = Array.isArray(parsedData) ? parsedData : (parsedData.parts || []);
+  } catch(e) {
+    lessonParts = []; 
+  }
+  if(!Array.isArray(lessonParts)) lessonParts = [];
+
+  var wrapper = document.getElementById('sections-wrapper');
+  if (wrapper) wrapper.innerHTML = ''; 
+
+  lessonParts.forEach(function(part) {
+    var article = document.createElement('article');
+    article.id = part.id;
+    article.className = 'lesson-section transition-opacity duration-300 opacity-0 hidden';
+    
+    var innerDiv = document.createElement('div');
+    innerDiv.className = 'markdown-body';
+    innerDiv.setAttribute('data-content-target', part.id);
+    
+    article.appendChild(innerDiv);
+    if (wrapper) wrapper.appendChild(article);
+  });
+
+  // ==========================================
+  // 3. MARKDOWN PARSING & INJECTION
+  // ==========================================
+
+  var hasMarked = typeof window.marked !== 'undefined' && window.marked && typeof window.marked.parse === 'function';
+  
+  if(hasMarked){
+    try{
+      // Attach the KaTeX extension so formulas render properly
+      if (typeof window.markedKatex !== 'undefined') {
+        window.marked.use(window.markedKatex({
+          throwOnError: false,
+          output: 'html'
+        }));
+      }
+      window.marked.setOptions({ breaks: false, gfm: true });
+    }catch(e){}
+  }
+
+  lessonParts.forEach(function (part) {
+    var target = document.querySelector('[data-content-target="' + part.id + '"]');
+    if (target) {
+      var content = (part.content || '').trim();
+      // If the content starts with an HTML tag, inject it directly to bypass Markdown escaping
+      if (content.startsWith('<')) {
+        target.innerHTML = content;
+      } else {
+        target.innerHTML = hasMarked ? window.marked.parse(content) : simpleMarkdownToHtml(content);
+      }
+    }
+  });
+
+  // ==========================================
+  // 4. NAVIGATION STATE & LOGIC
+  // ==========================================
+
+  var sections = lessonParts
+    .map(function(part){ return document.getElementById(part.id); })
+    .filter(Boolean);
+
+  var currentIndex = 0; 
+
+  var contentStatus = document.getElementById('content-status');
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+
+  function updateMeta(index) {
+    if(contentStatus) contentStatus.textContent = 'Section ' + (index + 1) + ' of ' + lessonParts.length;
+
+    var atFirst = index === 0;
+    var atLast = index === lessonParts.length - 1;
+
+    if(prevBtn){
+      prevBtn.disabled = atFirst;
+    }
+    if(nextBtn){
+      nextBtn.disabled = atLast;
+    }
+    
+    var cardElement = document.querySelector('.card');
+    if(cardElement && window.scrollY > cardElement.offsetTop) {
+        window.scrollTo({ top: cardElement.offsetTop - 20, behavior: 'smooth' });
+    }
+  }
+
+  function showSection(index) {
+    if(!sections.length) return;
+    sections.forEach(function (section, i) {
+      if (i === index) {
+        section.classList.remove('hidden');
+        requestAnimationFrame(function () {
+          section.classList.remove('opacity-0');
+          section.classList.add('opacity-100');
+        });
+      } else {
+        section.classList.add('opacity-0');
+        section.classList.remove('opacity-100');
+        section.classList.add('hidden');
+      }
+    });
+    currentIndex = index;
+    updateMeta(index);
+  }
+
+  function transitionTo(index) {
+    if(!sections.length) return;
+    if (index < 0 || index >= sections.length || index === currentIndex) return;
+
+    var current = sections[currentIndex];
+    if(!current) return;
+
+    current.classList.add('opacity-0');
+    current.classList.remove('opacity-100');
+
+    window.setTimeout(function () {
+      current.classList.add('hidden'); 
+      
+      var next = sections[index];
+      if(!next) return;
+
+      next.classList.remove('hidden'); 
+      requestAnimationFrame(function () {
+        next.classList.remove('opacity-0');
+        next.classList.add('opacity-100');
+      });
+
+      currentIndex = index;
+      updateMeta(index);
+    }, 400);
+  }
+
+  // ==========================================
+  // 5. EVENT LISTENERS & INITIALIZATION
+  // ==========================================
+
+  if(prevBtn) prevBtn.addEventListener('click', function () { transitionTo(currentIndex - 1); });
+  if(nextBtn) nextBtn.addEventListener('click', function () { transitionTo(currentIndex + 1); });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'ArrowLeft') transitionTo(currentIndex - 1);
+    if (event.key === 'ArrowRight') transitionTo(currentIndex + 1);
+  });
+
+  if(sections.length) {
+    showSection(0);
+  } else {
+    updateMeta(0); 
+  }
+
+})();
+  </script>
+</body>
+</html>

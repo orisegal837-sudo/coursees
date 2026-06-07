@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson Module - Agent Task Suites and Evaluation Rubrics</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked-katex-extension/lib/index.umd.js"></script>
+
+  <script>
+    // Minimal Tailwind shim (used only if CDN fails). This keeps the page functional without external deps.
+    (function(){
+      var ok = true;
+      try{
+        if(!window.tailwind) ok = false;
+      }catch(e){ ok = false; }
+    })();
+  </script>
+  <style>
+    /* ========================================
+      PREMIUM THEME & TYPOGRAPHY VARIABLES
+      ========================================
+    */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root{
+      --bg-base: #05050a;
+      --bg-surface: rgba(17, 18, 28, 0.65);
+      --bg-surface-hover: rgba(255, 255, 255, 0.05);
+      
+      --stroke-soft: rgba(255, 255, 255, 0.08);
+      --stroke-strong: rgba(255, 255, 255, 0.15);
+      
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-heading: #ffffff;
+      
+      --accent-primary: #8b5cf6;
+      --accent-secondary: #3b82f6;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      
+      --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --shadow-glow: 0 0 40px rgba(139, 92, 246, 0.15);
+      
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      
+      --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      
+      /* New Wider Content Width */
+      --content-max-width: 1200px; 
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      /* Dynamic ambient background */
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.08), transparent 40%),
+        radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.08), transparent 40%);
+      background-attachment: fixed;
+    }
+
+    /* ========================================
+      LAYOUT & SHELL
+      ========================================
+    */
+    main {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .view-shell {
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    
+    .view-inner {
+      padding: clamp(20px, 4vw, 48px) 24px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ========================================
+      TOP HEADER & TYPOGRAPHY
+      ========================================
+    */
+    .topbar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+      margin-bottom: 40px;
+      width: 100%;
+      max-width: var(--content-max-width);
+      animation: fadeDown 0.6s ease-out;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border: 1px solid var(--stroke-strong);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 999px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent-gradient);
+      box-shadow: 0 0 8px var(--accent-primary);
+    }
+
+    .title {
+      margin: 8px 0 0 0;
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--text-heading);
+      background: linear-gradient(to right, #ffffff, #a5b4fc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: clamp(16px, 1.5vw, 18px);
+      line-height: 1.6;
+      max-width: 60ch;
+    }
+
+    /* ========================================
+      MAIN CARD (WIDER VIEWPORT)
+      ========================================
+    */
+    .grid {
+      display: flex;
+      width: 100%;
+      justify-content: center;
+      flex-grow: 1;
+    }
+
+    .card {
+      width: 100%;
+      max-width: var(--content-max-width);
+      border: 1px solid var(--stroke-soft);
+      background: var(--bg-surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-soft), var(--shadow-glow);
+    }
+
+    .card-h {
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--stroke-soft);
+      background: rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-h h2 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .card-b {
+      padding: clamp(24px, 5vw, 56px);
+      flex-grow: 1;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #c4b5fd;
+    }
+
+    /* ========================================
+      NAVIGATION BOTTOM BAR
+      ========================================
+    */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 24px;
+      border-top: 1px solid var(--stroke-soft);
+      background: rgba(5, 5, 10, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 14px 28px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke-strong);
+      background: var(--bg-surface);
+      color: var(--text-heading);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--bg-surface-hover);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      border: none;
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #9f7aea, #60a5fa);
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ========================================
+      ENHANCED MARKDOWN TYPOGRAPHY
+      ========================================
+    */
+    .markdown-body {
+      max-width: 100%;
+      margin: 0 auto;
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--text-main);
+    }
+
+    .markdown-body h1, 
+    .markdown-body h2, 
+    .markdown-body h3 {
+      color: var(--text-heading);
+      font-weight: 600;
+      margin-top: 2em;
+      margin-bottom: 0.75em;
+      line-height: 1.3;
+    }
+
+    .markdown-body h1 { 
+      font-size: 2.25em; 
+      letter-spacing: -0.02em;
+    }
+    
+    .markdown-body h2 { 
+      font-size: 1.75em; 
+      letter-spacing: -0.01em;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid var(--stroke-soft);
+    }
+    
+    .markdown-body h3 { 
+      font-size: 1.35em; 
+      color: #e2e8f0;
+    }
+
+    /* Eliminate top margin for the very first element to align with padding */
+    .markdown-body > *:first-child { margin-top: 0; }
+
+    .markdown-body p {
+      margin-top: 0;
+      margin-bottom: 1.25em;
+    }
+
+    .markdown-body ul, 
+    .markdown-body ol {
+      margin-top: 0;
+      margin-bottom: 1.5em;
+      padding-left: 1.5em;
+    }
+
+    .markdown-body li {
+      margin-bottom: 0.5em;
+    }
+
+    .markdown-body li > ul, 
+    .markdown-body li > ol {
+      margin-top: 0.5em;
+    }
+
+    .markdown-body strong {
+      color: var(--text-heading);
+      font-weight: 600;
+    }
+
+    .markdown-body a {
+      color: var(--accent-secondary);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    .markdown-body a:hover {
+      border-bottom-color: var(--accent-secondary);
+    }
+
+    .markdown-body code {
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.2em 0.4em;
+      border-radius: 6px;
+      font-size: 0.9em;
+      color: #93c5fd; /* Light blue tint for inline code */
+    }
+
+    .markdown-body pre {
+      background: #0d1117;
+      border: 1px solid var(--stroke-soft);
+      border-radius: var(--radius-md);
+      padding: 1.25em;
+      overflow-x: auto;
+      margin-bottom: 1.5em;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .markdown-body pre code {
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      color: #e2e8f0;
+      font-size: 0.9em;
+      line-height: 1.6;
+    }
+
+    .markdown-body blockquote {
+      margin: 0 0 1.5em 0;
+      padding: 0.5em 0 0.5em 1.5em;
+      border-left: 4px solid var(--accent-primary);
+      color: var(--text-muted);
+      background: linear-gradient(to right, rgba(139, 92, 246, 0.05), transparent);
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+
+    .markdown-body blockquote p:last-child {
+      margin-bottom: 0;
+    }
+
+    .markdown-body hr {
+      border: none;
+      height: 1px;
+      background: var(--stroke-strong);
+      margin: 3em 0;
+    }
+
+    /* ========================================
+      TASK CARD STYLES (STRUCTURED CARDS)
+      ========================================
+    */
+    .task-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .task-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--stroke-soft);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .task-card:hover {
+      border-color: var(--stroke-strong);
+      transform: translateY(-2px);
+    }
+    .task-card h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.25em;
+      color: var(--accent-secondary);
+    }
+    .objective-card {
+      border-left: 4px solid var(--accent-primary);
+    }
+    .instructions-list {
+      padding-left: 20px;
+    }
+    .instructions-list li {
+      margin-bottom: 12px;
+    }
+    .criteria-checklist {
+      list-style: none;
+      padding-left: 0;
+    }
+    .criteria-checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .criteria-checklist li::before {
+      content: "✓";
+      color: #10b981;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* KaTeX overrides for dark mode */
+    .katex {
+      color: var(--text-heading);
+      font-size: 1.1em;
+    }
+
+    /* ========================================
+      TRANSITIONS & ANIMATIONS
+      ========================================
+    */
+    .transition-opacity { transition: opacity 400ms ease, transform 400ms ease; }
+    .opacity-100 { opacity: 1; transform: translateY(0); }
+    .opacity-0 { opacity: 0; transform: translateY(10px); }
+    .hidden { display: none !important; }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .transition-opacity { transition: none !important; }
+      .btn { transition: none !important; }
+      .topbar { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <textarea id="markdown-source" style="display:none;">
+    [
+  {
+    "id": "guide_page_1",
+    "content": "# Page 1 \u2014 Objective and Prerequisites\n\n## Objective\nBuild and optimize an **ultrasound-assisted alkaline pretreatment workflow** for lignocellulosic biomass so you can:\n- **Increase delignification** of biomass such as sugarcane bagasse\n- **Improve cellulose accessibility** for downstream enzymatic hydrolysis or further processing\n- **Use cavitation strategically** to intensify alkali penetration without relying on ultrasound as a stand-alone chemical treatment\n\n## What you will do\nYou will set up a pretreatment system that combines:\n- **Sodium hydroxide (NaOH)** for lignin disruption and lignin\u2013carbohydrate bond cleavage\n- **Ultrasound energy** to enhance mass transfer, mixing, and cell wall rupture\n- **Controlled operating conditions** to find the optimum rather than simply maximizing severity\n\n## Technical prerequisites\nHave the following in place before starting:\n- **Biomass source**: dried and milled sugarcane bagasse or similar lignocellulosic feedstock\n- **Alkali reagent**: analytical-grade sodium hydroxide (NaOH)\n- **Ultrasonic reactor**: preferably a **probe/horn sonicator** with adjustable power output; an ultrasonic bath can be used for comparison\n- **Temperature control**: water bath, jacketed reactor, or external heating system to maintain around **70 \u00b0C**\n- **Agitation setup**: magnetic stirrer or mechanical mixing\n- **Filtration and washing tools**: vacuum filtration setup, filter paper, deionized water\n- **Drying equipment**: oven or lyophilizer for recovered solids\n- **Characterization access**: FTIR, XRD, SEM, and BET analysis if you want to confirm structural changes\n- **Basic lab safety gear**: chemical-resistant gloves, eye protection, lab coat, and sonication shielding\n\n## Practical target conditions to test\nUse these as your starting benchmark:\n- **NaOH concentration**: around **1 M**\n- **Treatment time**: up to **60 minutes**\n- **Biomass-to-liquid ratio**: about **1:20**\n- **Temperature**: about **70 \u00b0C**\n- **Ultrasonic power**: about **100 W**\n- **Duty cycle**: about **70%**\n\n## Why these prerequisites matter\n- **NaOH provides the chemistry** needed to solubilize lignin and weaken the matrix.\n- **Ultrasound provides the physics** needed to accelerate penetration and disrupt structure.\n- **Temperature and power control** are essential because cavitation can improve or worsen pretreatment depending on how it is tuned.\n\n## Example setup\nIf you are starting with 10 g of dry bagasse, prepare enough 1 M NaOH solution to maintain a **1:20 solid-to-liquid ratio**. Place the suspension in a sonication vessel with temperature control, then run the horn at **100 W** and **70% duty cycle** while keeping the slurry near **70 \u00b0C**."
+  },
+  {
+    "id": "guide_page_2",
+    "content": "# Page 2 \u2014 Step-by-Step Implementation: Build the Pretreatment Protocol\n\n## 1) Prepare and standardize the biomass\n**Action:** Dry, mill, and sieve the biomass to a consistent particle size.\n\n**Why:** Uniform feedstock improves reproducibility and prevents pretreatment results from being dominated by particle-size variability.\n\n**How (Example):**\n- Oven-dry sugarcane bagasse to constant weight.\n- Mill it and sieve it to a defined range, such as 0.5\u20131 mm.\n- Record moisture content so alkali loading is based on dry mass.\n\n## 2) Prepare the alkaline solution\n**Action:** Make the NaOH solution at the target concentration.\n\n**Why:** Alkali is the main chemical driver for lignin removal and bond cleavage.\n\n**How (Example):**\n- Dissolve NaOH in deionized water to prepare **1 M NaOH**.\n- Prepare enough volume to achieve a **1:20 biomass-to-liquid ratio**.\n- Allow the solution to cool before use if heat is generated during preparation.\n\n## 3) Load the biomass into the reactor\n**Action:** Add the biomass to the NaOH solution in the sonication vessel.\n\n**Why:** Proper immersion and dispersion ensure that ultrasound-generated cavitation affects the whole suspension.\n\n**How (Example):**\n- Add 10 g dry biomass to 200 mL of 1 M NaOH.\n- Stir briefly before sonication to break up clumps.\n- Ensure the probe or bath has enough clearance for good energy distribution.\n\n## 4) Apply ultrasound under controlled conditions\n**Action:** Sonicate the slurry at the target power, duty cycle, and temperature.\n\n**Why:** Cavitation creates microjets, shear, and turbulence that improve alkali penetration and disrupt the biomass matrix.\n\n**How (Example):**\n- Set the ultrasonic horn to **100 W**.\n- Use a **70% duty cycle** for pulsed operation.\n- Keep the suspension at **70 \u00b0C**.\n- Run the treatment for up to **60 minutes** while stirring.\n\n## 5) Recover and wash the treated solids\n**Action:** Separate the biomass from the liquid and wash it thoroughly.\n\n**Why:** Washing removes residual alkali and solubilized lignin fragments so downstream analysis reflects the pretreatment effect, not leftover chemicals.\n\n**How (Example):**\n- Vacuum-filter the slurry immediately after sonication.\n- Wash the solids with deionized water until the filtrate approaches neutral pH.\n- Collect the solid fraction for drying and analysis.\n\n## 6) Dry and weigh the pretreated solids\n**Action:** Dry the recovered biomass and determine mass loss.\n\n**Why:** Mass reduction gives a first-pass indication of solubilization and delignification.\n\n**How (Example):**\n- Dry the washed solids at 60\u201370 \u00b0C to constant mass.\n- Calculate solid recovery and compare it to the untreated biomass.\n- Keep samples labeled by treatment condition for later comparison."
+  },
+  {
+    "id": "guide_page_3",
+    "content": "# Page 3 \u2014 Optimize the Operating Conditions\n\n## 1) Tune treatment time\n**Action:** Test multiple sonication times instead of choosing one duration immediately.\n\n**Why:** Delignification usually rises with time up to an optimum, then plateaus or wastes energy.\n\n**How (Example):**\n- Run 20, 40, 60, and 80 minute trials.\n- Expect performance to improve up to around **60 minutes**.\n- Select the shortest time that gives near-maximal delignification.\n\n## 2) Tune NaOH concentration\n**Action:** Compare several alkali strengths around the target level.\n\n**Why:** More alkali can improve lignin removal, but excessive concentration raises chemical cost and waste.\n\n**How (Example):**\n- Test 0.5 M, 1.0 M, and 1.5 M NaOH.\n- Identify the point where delignification gains begin to level off.\n- Use the minimum concentration that delivers acceptable cellulose accessibility.\n\n## 3) Adjust the solid-to-liquid ratio\n**Action:** Evaluate how much liquor is needed for effective mass transfer.\n\n**Why:** Too little liquid can limit contact and saturate the medium; too much increases cost and downstream handling.\n\n**How (Example):**\n- Compare ratios such as 1:10, 1:20, and 1:30.\n- Use **1:20** as a strong baseline because it often provides good contact without excessive dilution.\n\n## 4) Optimize temperature carefully\n**Action:** Increase temperature gradually while monitoring cavitation performance.\n\n**Why:** Higher temperature can improve reaction rate, but too much heat weakens cavitation by creating vapor cushions.\n\n**How (Example):**\n- Test 50 \u00b0C, 60 \u00b0C, 70 \u00b0C, and 80 \u00b0C.\n- Expect best performance near **70 \u00b0C**.\n- Avoid assuming hotter is better; the cavitation intensity may drop above the optimum.\n\n## 5) Optimize ultrasonic power\n**Action:** Compare low, medium, and high power settings.\n\n**Why:** More power strengthens cavitation only up to the point where bubble coalescence and cushioning reduce efficiency.\n\n**How (Example):**\n- Test 50 W, 100 W, and 150 W.\n- Use **100 W** as a likely optimum starting point.\n- Watch for reduced gains at excessive power.\n\n## 6) Tune duty cycle\n**Action:** Run pulsed sonication rather than continuous sonication when possible.\n\n**Why:** Pulsing can preserve cavitation efficiency, reduce horn wear, and improve reactor stability.\n\n**How (Example):**\n- Compare 50%, 70%, and 90% duty cycle.\n- Expect a strong balance around **70%**.\n- Use the duty cycle that maintains performance without overheating or damaging the probe.\n\n## 7) Compare reactor geometries\n**Action:** Benchmark a horn sonicator against an ultrasonic bath and an alkali-only control.\n\n**Why:** Reactor geometry strongly affects how much cavitation actually reaches the biomass.\n\n**How (Example):**\n- Run the same NaOH treatment in three modes:\n  1. **Alkali only**\n  2. **Ultrasonic bath + alkali**\n  3. **Ultrasonic horn + alkali**\n- Expect the **horn** to outperform the bath because it delivers stronger local energy directly into the suspension."
+  },
+  {
+    "id": "guide_page_4",
+    "content": "# Page 4 \u2014 Verify the Mechanism and Use the Pretreated Biomass\n\n## 1) Confirm delignification and structural change\n**Action:** Characterize the pretreated solids using analytical tools.\n\n**Why:** You need evidence that the process changed the biomass structure, not just the mass.\n\n**How (Example):**\n- Use **FTIR** to look for reduced lignin-associated aromatic bands.\n- Use **XRD** to check whether the cellulose crystallinity index increases after lignin removal.\n- Use **SEM** to observe fiber opening, surface roughening, and cell wall rupture.\n- Use **BET** to quantify increased surface area and accessible porosity.\n\n## 2) Link process conditions to outcomes\n**Action:** Correlate each operating variable with delignification and accessibility metrics.\n\n**Why:** Optimization is only useful if you can explain which factor controls the process.\n\n**How (Example):**\n- Plot delignification versus time, NaOH concentration, temperature, power, and duty cycle.\n- Identify the point where each variable stops improving performance.\n- Use these curves to define your practical operating window.\n\n## 3) Move the optimized solids into downstream conversion\n**Action:** Send the treated biomass to enzymatic saccharification or further chemical conversion.\n\n**Why:** The purpose of pretreatment is to make cellulose easier to access and convert.\n\n**How (Example):**\n- Neutralize and wash the solids thoroughly.\n- Set up enzymatic hydrolysis using your standard cellulase loading.\n- Compare sugar release from untreated vs ultrasound-alkali pretreated bagasse.\n\n## 4) Use the optimized condition as your reference protocol\n**Action:** Standardize the best-performing settings for routine use.\n\n**Why:** A fixed reference condition makes future experiments comparable and scalable.\n\n**How (Example):**\nUse the following as a reference starting protocol for sugarcane bagasse:\n- **1 M NaOH**\n- **1 hour**\n- **70 \u00b0C**\n- **1:20 biomass-to-liquid ratio**\n- **100 W**\n- **70% duty cycle**\n- **Ultrasonic horn reactor**\n\n## Final takeaway\nUltrasound-assisted alkaline pretreatment works best when you **treat cavitation as a process-intensification tool**, not as the main chemical agent. The alkali does the lignin-disrupting chemistry; the ultrasound improves contact, mixing, and structural opening. When you tune the system correctly, you can get higher delignification, better cellulose accessibility, and a stronger feedstock for downstream conversion with less unnecessary severity."
+  }
+]
+  </textarea>
+
+  <main>
+    <section id="lesson-app" style="width: 100%;">
+      <div class="view-shell">
+        <div class="view-inner">
+          <div class="topbar">
+            <div class="badge">
+              <span class="dot"></span>
+              <span>Practical Guide</span>
+            </div>
+            <h1 class="title">Practical Guide</h1>
+            <p class="subtitle">A step-by-step walkthrough of the implementation.</p>
+          </div>
+
+          <div class="grid">
+            <div class="card">
+              <div class="card-b">
+                <div id="sections-wrapper">
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav">
+          <button type="button" class="btn" id="prevBtn" aria-label="Previous section">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Previous</span>
+          </button>
+          <button type="button" class="btn btn-primary" id="nextBtn" aria-label="Next section">
+            <span>Continue to Next</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  (function () {
+  // ==========================================
+  // 1. HELPER FUNCTIONS
+  // ==========================================
+
+  function escapeHtml(s){
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function simpleMarkdownToHtml(md){
+    var lines = String(md || '').replace(/\r\n/g, '\n').split('\n');
+    var html = [];
+    var inCodeFence = false;
+    var codeLang = '';
+    var codeBuf = [];
+
+    function flushCode(){
+      if(!codeBuf.length) return;
+      var code = escapeHtml(codeBuf.join('\n'));
+      html.push('<pre><code' + (codeLang ? ' class="language-' + escapeHtml(codeLang) + '"' : '') + '>' + code + '</code></pre>');
+      codeBuf = [];
+      codeLang = '';
+    }
+
+    for(var i=0;i<lines.length;i++){
+      var line = lines[i];
+
+      var fenceMatch = line.match(/^\s*```(\w+)?\s*$/);
+      if(fenceMatch){
+        if(!inCodeFence){
+          inCodeFence = true;
+          codeLang = fenceMatch[1] || '';
+          codeBuf = [];
+        } else {
+          inCodeFence = false;
+          flushCode();
+        }
+        continue;
+      }
+
+      if(inCodeFence){
+        codeBuf.push(line);
+        continue;
+      }
+
+      if(/^\s*---\s*$/.test(line)){
+        html.push('<hr/>');
+        continue;
+      }
+
+      var headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+      if(headingMatch){
+        var level = headingMatch[1].length;
+        var text = headingMatch[2].trim();
+        html.push('<h' + level + '>' + renderInline(text) + '</h' + level + '>');
+        continue;
+      }
+
+      var ulMatch = line.match(/^\s*-\s+(.*)$/);
+      if(ulMatch){
+        var items = [];
+        while(i < lines.length && (m = lines[i].match(/^\s*-\s+(.*)$/))){
+          items.push('<li>' + renderInline(m[1].trim()) + '</li>');
+          i++;
+        }
+        i--;
+        html.push('<ul>' + items.join('') + '</ul>');
+        continue;
+      }
+
+      if(line.trim() === ''){
+        continue;
+      }
+
+      html.push('<p>' + renderInline(line.trim()) + '</p>');
+    }
+
+    flushCode();
+    return html.join('');
+
+    function renderInline(text){
+      var out = escapeHtml(text);
+      out = out.replace(/`([^`]+)`/g, function(_, code){ return '<code>' + code + '</code>'; });
+      out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      return out;
+    }
+  }
+
+  // ==========================================
+  // 2. DATA EXTRACTION & DYNAMIC PAGE CREATION
+  // ==========================================
+
+  var rawEl = document.getElementById('markdown-source');
+  var raw = rawEl ? rawEl.value : '[]';
+
+  var lessonParts;
+  try {
+    var parsedData = JSON.parse(raw.trim());
+    // UPDATED LOGIC: Handle both a direct array or the `{ parts: [...] }` object structure
+    lessonParts = Array.isArray(parsedData) ? parsedData : (parsedData.parts || []);
+  } catch(e) {
+    lessonParts = []; 
+  }
+  if(!Array.isArray(lessonParts)) lessonParts = [];
+
+  var wrapper = document.getElementById('sections-wrapper');
+  if (wrapper) wrapper.innerHTML = ''; 
+
+  lessonParts.forEach(function(part) {
+    var article = document.createElement('article');
+    article.id = part.id;
+    article.className = 'lesson-section transition-opacity duration-300 opacity-0 hidden';
+    
+    var innerDiv = document.createElement('div');
+    innerDiv.className = 'markdown-body';
+    innerDiv.setAttribute('data-content-target', part.id);
+    
+    article.appendChild(innerDiv);
+    if (wrapper) wrapper.appendChild(article);
+  });
+
+  // ==========================================
+  // 3. MARKDOWN PARSING & INJECTION
+  // ==========================================
+
+  var hasMarked = typeof window.marked !== 'undefined' && window.marked && typeof window.marked.parse === 'function';
+  
+  if(hasMarked){
+    try{
+      // Attach the KaTeX extension so formulas render properly
+      if (typeof window.markedKatex !== 'undefined') {
+        window.marked.use(window.markedKatex({
+          throwOnError: false,
+          output: 'html'
+        }));
+      }
+      window.marked.setOptions({ breaks: false, gfm: true });
+    }catch(e){}
+  }
+
+  lessonParts.forEach(function (part) {
+    var target = document.querySelector('[data-content-target="' + part.id + '"]');
+    if (target) {
+      var content = (part.content || '').trim();
+      // If the content starts with an HTML tag, inject it directly to bypass Markdown escaping
+      if (content.startsWith('<')) {
+        target.innerHTML = content;
+      } else {
+        target.innerHTML = hasMarked ? window.marked.parse(content) : simpleMarkdownToHtml(content);
+      }
+    }
+  });
+
+  // ==========================================
+  // 4. NAVIGATION STATE & LOGIC
+  // ==========================================
+
+  var sections = lessonParts
+    .map(function(part){ return document.getElementById(part.id); })
+    .filter(Boolean);
+
+  var currentIndex = 0; 
+
+  var contentStatus = document.getElementById('content-status');
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+
+  function updateMeta(index) {
+    if(contentStatus) contentStatus.textContent = 'Section ' + (index + 1) + ' of ' + lessonParts.length;
+
+    var atFirst = index === 0;
+    var atLast = index === lessonParts.length - 1;
+
+    if(prevBtn){
+      prevBtn.disabled = atFirst;
+    }
+    if(nextBtn){
+      nextBtn.disabled = atLast;
+    }
+    
+    var cardElement = document.querySelector('.card');
+    if(cardElement && window.scrollY > cardElement.offsetTop) {
+        window.scrollTo({ top: cardElement.offsetTop - 20, behavior: 'smooth' });
+    }
+  }
+
+  function showSection(index) {
+    if(!sections.length) return;
+    sections.forEach(function (section, i) {
+      if (i === index) {
+        section.classList.remove('hidden');
+        requestAnimationFrame(function () {
+          section.classList.remove('opacity-0');
+          section.classList.add('opacity-100');
+        });
+      } else {
+        section.classList.add('opacity-0');
+        section.classList.remove('opacity-100');
+        section.classList.add('hidden');
+      }
+    });
+    currentIndex = index;
+    updateMeta(index);
+  }
+
+  function transitionTo(index) {
+    if(!sections.length) return;
+    if (index < 0 || index >= sections.length || index === currentIndex) return;
+
+    var current = sections[currentIndex];
+    if(!current) return;
+
+    current.classList.add('opacity-0');
+    current.classList.remove('opacity-100');
+
+    window.setTimeout(function () {
+      current.classList.add('hidden'); 
+      
+      var next = sections[index];
+      if(!next) return;
+
+      next.classList.remove('hidden'); 
+      requestAnimationFrame(function () {
+        next.classList.remove('opacity-0');
+        next.classList.add('opacity-100');
+      });
+
+      currentIndex = index;
+      updateMeta(index);
+    }, 400);
+  }
+
+  // ==========================================
+  // 5. EVENT LISTENERS & INITIALIZATION
+  // ==========================================
+
+  if(prevBtn) prevBtn.addEventListener('click', function () { transitionTo(currentIndex - 1); });
+  if(nextBtn) nextBtn.addEventListener('click', function () { transitionTo(currentIndex + 1); });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'ArrowLeft') transitionTo(currentIndex - 1);
+    if (event.key === 'ArrowRight') transitionTo(currentIndex + 1);
+  });
+
+  if(sections.length) {
+    showSection(0);
+  } else {
+    updateMeta(0); 
+  }
+
+})();
+  </script>
+</body>
+</html>

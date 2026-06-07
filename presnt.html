@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lesson 1 ò Python Essentials</title>
+  <style>
+    :root{
+      --bg: #0b1220;
+      --panel: rgba(255,255,255,.06);
+      --panel-2: rgba(255,255,255,.08);
+      --stroke: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.72);
+      --muted-2: rgba(255,255,255,.62);
+      --accent: #7c3aed;
+      --accent-2: #22d3ee;
+      --shadow: 0 18px 50px rgba(0,0,0,.45);
+      --radius-xl: 22px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      font-family: var(--sans);
+      background:
+        radial-gradient(1200px 800px at 30% -10%, rgba(124,58,237,.20), transparent 60%),
+        radial-gradient(1000px 680px at 90% 10%, rgba(34,211,238,.14), transparent 55%),
+        linear-gradient(180deg, #060913 0%, #050712 100%);
+      color: var(--text);
+    }
+
+    main{
+      min-height: 100%;
+      display:flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+    }
+
+    section[id]{
+      width: min(1100px, 100%);
+    }
+
+    .view-shell{
+      color: var(--text);
+      background:
+        radial-gradient(1000px 600px at 10% 0%, rgba(124,58,237,.35), transparent 60%),
+        radial-gradient(900px 520px at 90% 20%, rgba(34,211,238,.22), transparent 55%),
+        linear-gradient(180deg, #0b1220 0%, #070b14 100%);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .view-inner{
+      padding: clamp(18px, 3.5vw, 34px);
+    }
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom: 18px;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 8px 12px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing:.2px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 0 4px rgba(124,58,237,.16);
+    }
+    .title{
+      margin: 6px 0 6px 0;
+      font-size: clamp(22px, 2.6vw, 34px);
+      line-height: 1.15;
+      letter-spacing: -.02em;
+    }
+    .subtitle{
+      margin: 0;
+      color: var(--muted);
+      font-size: 15.5px;
+      line-height: 1.6;
+      max-width: 78ch;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 16px;
+      margin-top: 18px;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+      .topbar{ flex-direction: column; align-items: stretch; }
+      .chip[aria-label="View ID"]{ align-self:flex-start; }
+    }
+    .card{
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius-lg);
+      overflow:hidden;
+    }
+    .card-h{
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .card-h h2{
+      margin:0;
+      font-size: 14px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.86);
+    }
+    .chip{
+      font-size: 12px;
+      color: rgba(255,255,255,.78);
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(124,58,237,.10);
+      padding: 6px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .card-b{
+      padding: 16px;
+    }
+    .p{
+      margin: 0 0 12px 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+    .strong{
+      color: rgba(255,255,255,.92);
+      font-weight: 650;
+    }
+    .rules{
+      margin: 12px 0 0 0;
+      padding: 0;
+      list-style: none;
+      display:grid;
+      gap: 10px;
+    }
+    .rule{
+      display:flex;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: var(--radius-md);
+    }
+    .rule svg{ flex: 0 0 auto; margin-top: 1px; opacity: .95; }
+    .rule b{ color: rgba(255,255,255,.92); }
+    .rule span{ color: var(--muted-2); font-size: 14px; line-height: 1.55; }
+
+    .code{
+      border: 1px solid rgba(34,211,238,.22);
+      background:
+        radial-gradient(800px 300px at 20% 0%, rgba(34,211,238,.10), transparent 65%),
+        linear-gradient(180deg, rgba(8,12,24,.72), rgba(8,12,24,.92));
+      border-radius: var(--radius-lg);
+      overflow:hidden;
+      margin-top: 12px;
+    }
+    .code-h{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.78);
+      font-size: 12.5px;
+    }
+    .code-dots{
+      display:flex; gap:6px; align-items:center;
+    }
+    .code-dots i{
+      width:10px;height:10px;border-radius:999px; display:inline-block;
+      background: rgba(255,255,255,.22);
+    }
+    .code pre{
+      margin:0;
+      padding: 14px 14px 16px 14px;
+      font-family: var(--mono);
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: rgba(255,255,255,.90);
+      overflow:auto;
+      tab-size: 2;
+    }
+    .kw{ color: #a78bfa; }
+    .cm{ color: rgba(255,255,255,.55); }
+    .st{ color: #67e8f9; }
+    .nu{ color: #fbbf24; }
+
+    .table-wrap{
+      overflow:auto;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+    table{
+      width:100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 640px;
+      color: rgba(255,255,255,.86);
+      font-size: 14px;
+    }
+    thead th{
+      text-align:left;
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.72);
+      background: rgba(255,255,255,.05);
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 1;
+    }
+    tbody td{
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      vertical-align: top;
+      color: rgba(255,255,255,.82);
+    }
+    tbody tr:hover td{
+      background: rgba(124,58,237,.06);
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      font-family: var(--mono);
+      font-size: 13px;
+      color: rgba(255,255,255,.88);
+      white-space: nowrap;
+    }
+    .pill i{
+      width:8px;height:8px;border-radius:999px; display:inline-block;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      opacity:.95;
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap: 12px;
+      padding: 16px clamp(18px, 3.5vw, 34px);
+      border-top: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.90);
+      text-decoration:none;
+      font-size: 14px;
+      line-height: 1;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
+      user-select:none;
+      white-space: nowrap;
+    }
+    .btn:hover{
+      background: rgba(255,255,255,.07);
+      border-color: rgba(255,255,255,.18);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(0,0,0,.25);
+    }
+    .btn:focus-visible{
+      outline: 2px solid rgba(34,211,238,.55);
+      outline-offset: 3px;
+    }
+    .btn-primary{
+      border-color: rgba(34,211,238,.30);
+      background: linear-gradient(135deg, rgba(124,58,237,.22), rgba(34,211,238,.16));
+    }
+    .btn svg{ opacity:.9; }
+    .sr-only{
+      position:absolute;
+      width:1px;height:1px;
+      padding:0;margin:-1px;
+      overflow:hidden;clip:rect(0,0,0,0);
+      white-space:nowrap;border:0;
+    }
+
+    .split{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 18px;
+    }
+    @media (max-width: 980px){
+      .split{ grid-template-columns: 1fr; }
+    }
+    .mini{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .kbd{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.86);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .kbd code{
+      font-family: var(--mono);
+      color: rgba(255,255,255,.90);
+    }
+    .hr{
+      height: 1px;
+      background: rgba(255,255,255,.10);
+      margin: 14px 0;
+      border: 0;
+    }
+
+    .callout{
+      border: 1px solid rgba(124,58,237,.22);
+      background:
+        radial-gradient(800px 260px at 10% 0%, rgba(124,58,237,.18), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+    }
+    .callout-h{
+      display:flex;
+      align-items:flex-start;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .icon-badge{
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(135deg, rgba(124,58,237,.22), rgba(34,211,238,.12));
+      display:grid;
+      place-items:center;
+      flex: 0 0 auto;
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+    }
+    .callout p{
+      margin: 0;
+      color: rgba(255,255,255,.78);
+      line-height: 1.7;
+      font-size: 14.5px;
+    }
+    .prompt{
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.035);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+    }
+    .prompt h3{
+      margin: 0 0 6px 0;
+      font-size: 14px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.86);
+    }
+    .choices{
+      margin: 10px 0 0 0;
+      padding: 0;
+      list-style: none;
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .choice{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.82);
+      font-size: 13.5px;
+      white-space: nowrap;
+    }
+    .choice i{
+      width: 10px; height: 10px; border-radius: 999px; display:inline-block;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 0 4px rgba(34,211,238,.10);
+      opacity: .95;
+    }
+
+    .transition-opacity { transition: opacity 300ms ease; }
+    .duration-300 { transition-duration: 300ms; }
+    .opacity-100 { opacity: 1; }
+    .opacity-0 { opacity: 0; }
+    .block { display: block; }
+    .hidden { display: none !important; }
+
+    @media (prefers-reduced-motion: reduce){
+      .transition-opacity{ transition: none !important; }
+      .btn{ transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section id="first" class="transition-opacity duration-300 opacity-100 block">
+      <div class="view-shell" aria-labelledby="p1-title">
+        <div class="view-inner">
+          <header class="topbar">
+            <div>
+              <div class="badge">
+                <span class="dot" aria-hidden="true"></span>
+                <span>Lesson 1 ò Python Essentials</span>
+              </div>
+              <h1 class="title" id="p1-title">Welcome to the world of programming</h1>
+              <p class="subtitle">
+                Python is often called a <span class="strong">ôbatteries-includedö</span> language because itÆs powerful, yet the syntax is designed to read almost like English.
+                In this first lesson, weÆll cover the absolute essentials: <span class="strong">Variables</span>, <span class="strong">Data Types</span>, and <span class="strong">Basic Logic</span>.
+              </p>
+            </div>
+
+            <div class="chip" aria-label="View ID">VIEW_ID: <span class="strong">page_1</span></div>
+          </header>
+
+          <div class="grid" role="region" aria-label="Lesson content">
+            <section class="card" aria-labelledby="vars-title">
+              <div class="card-h">
+                <h2 id="vars-title">1. The ôBoxö Metaphor: Variables</h2>
+                <span class="chip">Core concept</span>
+              </div>
+              <div class="card-b">
+                <p class="p">
+                  Think of a <span class="strong">variable</span> as a labeled box. You put a value inside the box so you can remember it and use it later.
+                </p>
+
+                <div class="code" role="group" aria-label="Python example: variables">
+                  <div class="code-h">
+                    <span>python</span>
+                    <span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                  </div>
+                  <pre><code><span class="cm"># To create a variable, just give it a name and a value</span>
+user_name = <span class="st">"Alex"</span>
+user_age = <span class="nu">25</span></code></pre>
+                </div>
+
+                <div style="margin-top:14px;">
+                  <p class="p" style="margin-bottom:10px;"><span class="strong">Key Rules for Names:</span></p>
+                  <ul class="rules">
+                    <li class="rule">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M20 7L10 17l-5-5" stroke="rgba(34,211,238,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </svg>
+                      <span><b>Use underscores</b> <code style="font-family:var(--mono);color:rgba(255,255,255,.86)">_</code> instead of spaces.</span>
+                    </li>
+                    <li class="rule">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M20 7L10 17l-5-5" stroke="rgba(34,211,238,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </svg>
+                      <span><b>Start with a letter</b> (not a number).</span>
+                    </li>
+                    <li class="rule">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M20 7L10 17l-5-5" stroke="rgba(34,211,238,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </svg>
+                      <span><b>Case matters</b>: <code style="font-family:var(--mono);color:rgba(255,255,255,.86)">Age</code> and <code style="font-family:var(--mono);color:rgba(255,255,255,.86)">age</code> are two different boxes.</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <section class="card" aria-labelledby="types-title">
+              <div class="card-h">
+                <h2 id="types-title">2. Common Data Types</h2>
+                <span class="chip">Quick reference</span>
+              </div>
+              <div class="card-b">
+                <p class="p">
+                  Python is smart enough to know whatÆs inside your ôboxö based on how you write it.
+                </p>
+
+                <div class="table-wrap" role="region" aria-label="Common Python data types table" tabindex="0">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th scope="col">Type</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Example</th>
+                        <th scope="col">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><span class="strong">String</span></td>
+                        <td><span class="pill"><i aria-hidden="true"></i>str</span></td>
+                        <td><span class="pill"><i aria-hidden="true"></i>"Hello"</span></td>
+                        <td>Text wrapped in quotes.</td>
+                      </tr>
+                      <tr>
+                        <td><span class="strong">Integer</span></td>
+                        <td><span class="pill"><i aria-hidden="true"></i>int</span></td>
+                        <td><span class="pill"><i aria-hidden="true"></i>42</span></td>
+                        <td>Whole numbers (no decimals).</td>
+                      </tr>
+                      <tr>
+                        <td><span class="strong">Float</span></td>
+                        <td><span class="pill"><i aria-hidden="true"></i>float</span></td>
+                        <td><span class="pill"><i aria-hidden="true"></i>3.14</span></td>
+                        <td>Numbers with a decimal point.</td>
+                      </tr>
+                      <tr>
+                        <td><span class="strong">Boolean</span></td>
+                        <td><span class="pill"><i aria-hidden="true"></i>bool</span></td>
+                        <td><span class="pill"><i aria-hidden="true"></i>True</span></td>
+                        <td>Logical values (True or False).</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <p class="p" style="margin-top:12px;margin-bottom:0;color:rgba(255,255,255,.68);font-size:13.5px;">
+                  Tip: Strings use quotes, numbers donÆt, and booleans start with a capital letter in Python.
+                </p>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="Pagination">
+          <a class="btn btn-primary" href="#middle" aria-label="Next Page">
+            <span>Next Page</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M9 18l6-6-6-6" stroke="rgba(255,255,255,.92)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </a>
+        </nav>
+      </div>
+    </section>
+
+    <section id="middle" class="transition-opacity duration-300 opacity-100 block">
+      <div class="view-shell" aria-labelledby="p2-title">
+        <div class="view-inner">
+          <header class="topbar">
+            <div>
+              <div class="badge">
+                <span class="dot" aria-hidden="true"></span>
+                <span>Lesson 1 ò Python Essentials</span>
+              </div>
+              <h1 class="title" id="p2-title">Working with collections &amp; logic</h1>
+              <p class="subtitle">
+                When one value isnÆt enough, reach for a <span class="strong">list</span>. When your code needs to choose a path, use <span class="strong">if / elif / else</span>.
+                These two tools unlock most everyday programs.
+              </p>
+
+              <div class="mini" aria-label="Quick hints">
+                <span class="kbd"><strong style="font-weight:650;color:rgba(255,255,255,.92)">Indexing:</strong> starts at <code>0</code></span>
+                <span class="kbd"><strong style="font-weight:650;color:rgba(255,255,255,.92)">Python blocks:</strong> use <code>indentation</code></span>
+              </div>
+            </div>
+
+            <div class="chip" aria-label="View ID">VIEW_ID: <span class="strong">page_2</span></div>
+          </header>
+
+          <div class="split" role="region" aria-label="Lesson content page 2">
+            <section class="card" aria-labelledby="lists-title">
+              <div class="card-h">
+                <h2 id="lists-title">3. Lists: The Organized Shelf</h2>
+                <span class="chip">Collection</span>
+              </div>
+              <div class="card-b">
+                <p class="p">
+                  Sometimes one box isn't enough. A <span class="strong">List</span> lets you keep multiple items in a specific order.
+                </p>
+
+                <ul class="rules" aria-label="List takeaways">
+                  <li class="rule">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M20 7L10 17l-5-5" stroke="rgba(34,211,238,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span><b>Use square brackets</b> to define a list: <code style="font-family:var(--mono);color:rgba(255,255,255,.86)">[]</code></span>
+                  </li>
+                  <li class="rule">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M20 7L10 17l-5-5" stroke="rgba(34,211,238,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span><b>Order matters</b>: items keep the position you give them.</span>
+                  </li>
+                  <li class="rule">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M20 7L10 17l-5-5" stroke="rgba(34,211,238,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span><b>Indexing starts at 0</b>: the first item is <code style="font-family:var(--mono);color:rgba(255,255,255,.86)">[0]</code>.</span>
+                  </li>
+                </ul>
+
+                <div class="code" role="group" aria-label="Python example: lists">
+                  <div class="code-h">
+                    <span>python</span>
+                    <span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                  </div>
+                  <pre><code><span class="cm"># Lists are defined with square brackets []</span>
+coding_languages = [<span class="st">"Python"</span>, <span class="st">"JavaScript"</span>, <span class="st">"C++"</span>]
+
+<span class="cm"># You can access items by their position (starting at 0!)</span>
+print(coding_languages[<span class="nu">0</span>])  <span class="cm"># This outputs: Python</span></code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section class="card" aria-labelledby="if-title">
+              <div class="card-h">
+                <h2 id="if-title">4. Making Decisions: If Statements</h2>
+                <span class="chip">Control flow</span>
+              </div>
+              <div class="card-b">
+                <p class="p">
+                  Logic is what makes a program <span class="strong">"smart."</span> We use <code style="font-family:var(--mono);color:rgba(255,255,255,.86)">if</code> statements to check a condition.
+                  <span class="strong">Indentation</span> (the space at the start of the line) is how Python knows which code belongs inside the <span class="strong">if</span> block.
+                </p>
+
+                <hr class="hr" aria-hidden="true" />
+
+                <ul class="rules" aria-label="If statement takeaways">
+                  <li class="rule">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M20 7L10 17l-5-5" stroke="rgba(34,211,238,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span><b>One condition</b> starts with <code style="font-family:var(--mono);color:rgba(255,255,255,.86)">if</code>.</span>
+                  </li>
+                  <li class="rule">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M20 7L10 17l-5-5" stroke="rgba(34,211,238,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span><b>Extra checks</b> use <code style="font-family:var(--mono);color:rgba(255,255,255,.86)">elif</code> (else-if).</span>
+                  </li>
+                  <li class="rule">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M20 7L10 17l-5-5" stroke="rgba(34,211,238,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span><b>Fallback</b> uses <code style="font-family:var(--mono);color:rgba(255,255,255,.86)">else</code> when nothing else matches.</span>
+                  </li>
+                </ul>
+
+                <div class="code" role="group" aria-label="Python example: if statements">
+                  <div class="code-h">
+                    <span>python</span>
+                    <span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                  </div>
+                  <pre><code>temperature = <span class="nu">22</span>
+
+<span class="kw">if</span> temperature &gt; <span class="nu">30</span>:
+    print(<span class="st">"It's a hot day!"</span>)
+<span class="kw">elif</span> temperature &gt; <span class="nu">15</span>:
+    print(<span class="st">"It's a nice day."</span>)
+<span class="kw">else</span>:
+    print(<span class="st">"Brrr, it's cold!"</span>)</code></pre>
+                </div>
+
+                <p class="p" style="margin-top:12px;margin-bottom:0;color:rgba(255,255,255,.68);font-size:13.5px;">
+                  Note: The colon <code style="font-family:var(--mono);color:rgba(255,255,255,.86)">:</code> and consistent indentation are requiredùotherwise Python will raise an error.
+                </p>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="Pagination" style="justify-content:space-between;">
+          <a class="btn" href="#first" aria-label="Previous Page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" stroke="rgba(255,255,255,.92)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <span>Previous Page</span>
+          </a>
+
+          <a class="btn btn-primary" href="#last" aria-label="Next Page">
+            <span>Next Page</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M9 18l6-6-6-6" stroke="rgba(255,255,255,.92)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </a>
+        </nav>
+      </div>
+    </section>
+
+    <section id="last" class="transition-opacity duration-300 opacity-100 block">
+      <div class="view-shell" aria-labelledby="p3-title">
+        <div class="view-inner">
+          <header class="topbar">
+            <div>
+              <div class="badge">
+                <span class="dot" aria-hidden="true"></span>
+                <span>Lesson 1 ò Python Essentials</span>
+              </div>
+              <h1 class="title" id="p3-title">5. Your First ôMini-Projectö</h1>
+              <p class="subtitle">
+                Copy and paste this into a Python editor to see it in action. It combines input, data types, and basic logic into one tiny program.
+              </p>
+            </div>
+
+            <div class="chip" aria-label="View ID">VIEW_ID: <span class="strong">page_3</span></div>
+          </header>
+
+          <div class="split" role="region" aria-label="Mini project content">
+            <section class="card" aria-labelledby="mini-code-title">
+              <div class="card-h">
+                <h2 id="mini-code-title">Mini-Project Code</h2>
+                <span class="chip">Try it now</span>
+              </div>
+              <div class="card-b">
+                <p class="p">
+                  Run it, then experiment: change the lucky number, add more conditions, or print a different message.
+                </p>
+
+                <div class="code" role="group" aria-label="Python mini-project code">
+                  <div class="code-h">
+                    <span>python</span>
+                    <span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                  </div>
+                  <pre><code><span class="cm"># 1. Input: Getting data from the user</span>
+name = input(<span class="st">"What is your name? "</span>)
+favorite_number = int(input(<span class="st">"What is your favorite number? "</span>))
+
+<span class="cm"># 2. Logic: Checking the number</span>
+<span class="kw">if</span> favorite_number == <span class="nu">7</span>:
+    print(f<span class="st">"Hey {name}, 7 is a lucky number!"</span>)
+<span class="kw">else</span>:
+    print(f<span class="st">"Cool name, {name}. {favorite_number} is a solid choice."</span>)</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <aside class="card" aria-labelledby="next-steps-title">
+              <div class="card-h">
+                <h2 id="next-steps-title">Quick Tip &amp; Next Step</h2>
+                <span class="chip">Keep going</span>
+              </div>
+              <div class="card-b" style="display:grid;gap:12px;">
+                <div class="callout" role="note" aria-label="Quick tip callout">
+                  <div class="callout-h">
+                    <div class="icon-badge" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M12 2a7 7 0 0 0-4 12.75V18a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-3.25A7 7 0 0 0 12 2Z" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-linecap="round"></path>
+                        <path d="M9 22h6" stroke="rgba(34,211,238,.9)" stroke-width="2" stroke-linecap="round"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <p><span class="strong">Quick Tip:</span> DonÆt worry about memorizing everything. In programming, knowing <span class="strong">how to search</span> for a solution is just as important as knowing the code itself.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="prompt" aria-label="Learning goal prompt">
+                  <h3>WhatÆs your goal with Python?</h3>
+                  <p class="p" style="margin:0;color:rgba(255,255,255,.72);font-size:14.5px;">
+                    Are you looking to automate tasks, analyze data, or maybe build a website?
+                  </p>
+                  <ul class="choices" aria-label="Suggested goals">
+                    <li class="choice"><i aria-hidden="true"></i>Automate tasks</li>
+                    <li class="choice"><i aria-hidden="true"></i>Analyze data</li>
+                    <li class="choice"><i aria-hidden="true"></i>Build a website</li>
+                  </ul>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="Pagination" style="justify-content:flex-start;">
+          <a class="btn" href="#middle" aria-label="Previous Page">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" stroke="rgba(255,255,255,.92)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <span>Previous Page</span>
+          </a>
+        </nav>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const VIEW_IDS = ['first', 'middle', 'last'];
+      const views = VIEW_IDS
+        .map(id => document.getElementById(id))
+        .filter(Boolean);
+
+      if (!views.length) return;
+
+      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const getViewById = (id) => views.find(v => v.id === id) || null;
+
+      const fadeDuration = (() => {
+        if (prefersReduced) return 0;
+        const el = views[0];
+        const cs = getComputedStyle(el);
+        const dur = (cs.transitionDuration || '0s').split(',')[0].trim();
+        const ms = dur.endsWith('ms') ? parseFloat(dur) : dur.endsWith('s') ? parseFloat(dur) * 1000 : 0;
+        return Number.isFinite(ms) && ms > 0 ? ms : 300;
+      })();
+
+      let isSwitching = false;
+      let activeId = null;
+
+      function applyVisibility(v, isActive){
+        if (isActive) {
+          v.classList.remove('hidden', 'opacity-0');
+          v.classList.add('block', 'opacity-100');
+          v.removeAttribute('aria-hidden');
+        } else {
+          v.classList.add('hidden');
+          v.classList.remove('block');
+          v.classList.add('opacity-0');
+          v.classList.remove('opacity-100');
+          v.setAttribute('aria-hidden', 'true');
+        }
+      }
+
+      function setInitialVisibility() {
+        const hash = (location.hash || '').replace('#', '');
+        const initial = getViewById(hash) ? hash : (views[0]?.id || null);
+
+        views.forEach(v => applyVisibility(v, v.id === initial));
+        activeId = initial;
+
+        if (initial) history.replaceState(null, '', `#${initial}`);
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      }
+
+      function showView(targetId, { updateHash = true } = {}) {
+        const target = getViewById(targetId);
+        if (!target) return;
+        if (isSwitching) return;
+
+        if (activeId === targetId) {
+          window.scrollTo({ top: 0, left: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
+          return;
+        }
+
+        isSwitching = true;
+        const current = activeId ? getViewById(activeId) : null;
+
+        const afterFadeOut = () => {
+          if (current) applyVisibility(current, false);
+
+          target.classList.remove('hidden');
+          target.classList.add('block');
+          target.setAttribute('aria-hidden', 'false');
+
+          if (fadeDuration > 0) {
+            target.classList.add('opacity-0');
+            target.classList.remove('opacity-100');
+          } else {
+            target.classList.remove('opacity-0');
+            target.classList.add('opacity-100');
+          }
+
+          window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+
+          if (fadeDuration > 0) {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                target.classList.remove('opacity-0');
+                target.classList.add('opacity-100');
+              });
+            });
+          }
+
+          setTimeout(() => {
+            activeId = targetId;
+            if (updateHash) history.pushState(null, '', `#${targetId}`);
+            isSwitching = false;
+          }, fadeDuration);
+        };
+
+        if (current && fadeDuration > 0) {
+          current.classList.remove('opacity-100');
+          current.classList.add('opacity-0');
+          setTimeout(afterFadeOut, fadeDuration);
+        } else {
+          if (current) applyVisibility(current, false);
+          afterFadeOut();
+        }
+      }
+
+      function onNavClick(e) {
+        const a = e.target.closest('a[href^="#"]');
+        if (!a) return;
+
+        const href = a.getAttribute('href') || '';
+        const id = href.slice(1);
+        if (!getViewById(id)) return;
+
+        e.preventDefault();
+        showView(id);
+      }
+
+      function onHashChange() {
+        const id = (location.hash || '').replace('#', '');
+        if (getViewById(id)) showView(id, { updateHash: false });
+      }
+
+      document.addEventListener('click', onNavClick, { passive: false });
+      window.addEventListener('hashchange', onHashChange);
+
+      setInitialVisibility();
+    })();
+  </script>
+</body>
+</html>

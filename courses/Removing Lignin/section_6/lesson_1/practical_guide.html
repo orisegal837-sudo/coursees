@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson Module - Agent Task Suites and Evaluation Rubrics</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked-katex-extension/lib/index.umd.js"></script>
+
+  <script>
+    // Minimal Tailwind shim (used only if CDN fails). This keeps the page functional without external deps.
+    (function(){
+      var ok = true;
+      try{
+        if(!window.tailwind) ok = false;
+      }catch(e){ ok = false; }
+    })();
+  </script>
+  <style>
+    /* ========================================
+      PREMIUM THEME & TYPOGRAPHY VARIABLES
+      ========================================
+    */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root{
+      --bg-base: #05050a;
+      --bg-surface: rgba(17, 18, 28, 0.65);
+      --bg-surface-hover: rgba(255, 255, 255, 0.05);
+      
+      --stroke-soft: rgba(255, 255, 255, 0.08);
+      --stroke-strong: rgba(255, 255, 255, 0.15);
+      
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-heading: #ffffff;
+      
+      --accent-primary: #8b5cf6;
+      --accent-secondary: #3b82f6;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      
+      --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --shadow-glow: 0 0 40px rgba(139, 92, 246, 0.15);
+      
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      
+      --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      
+      /* New Wider Content Width */
+      --content-max-width: 1200px; 
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      /* Dynamic ambient background */
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.08), transparent 40%),
+        radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.08), transparent 40%);
+      background-attachment: fixed;
+    }
+
+    /* ========================================
+      LAYOUT & SHELL
+      ========================================
+    */
+    main {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .view-shell {
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    
+    .view-inner {
+      padding: clamp(20px, 4vw, 48px) 24px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ========================================
+      TOP HEADER & TYPOGRAPHY
+      ========================================
+    */
+    .topbar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+      margin-bottom: 40px;
+      width: 100%;
+      max-width: var(--content-max-width);
+      animation: fadeDown 0.6s ease-out;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border: 1px solid var(--stroke-strong);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 999px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent-gradient);
+      box-shadow: 0 0 8px var(--accent-primary);
+    }
+
+    .title {
+      margin: 8px 0 0 0;
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--text-heading);
+      background: linear-gradient(to right, #ffffff, #a5b4fc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: clamp(16px, 1.5vw, 18px);
+      line-height: 1.6;
+      max-width: 60ch;
+    }
+
+    /* ========================================
+      MAIN CARD (WIDER VIEWPORT)
+      ========================================
+    */
+    .grid {
+      display: flex;
+      width: 100%;
+      justify-content: center;
+      flex-grow: 1;
+    }
+
+    .card {
+      width: 100%;
+      max-width: var(--content-max-width);
+      border: 1px solid var(--stroke-soft);
+      background: var(--bg-surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-soft), var(--shadow-glow);
+    }
+
+    .card-h {
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--stroke-soft);
+      background: rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-h h2 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .card-b {
+      padding: clamp(24px, 5vw, 56px);
+      flex-grow: 1;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #c4b5fd;
+    }
+
+    /* ========================================
+      NAVIGATION BOTTOM BAR
+      ========================================
+    */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 24px;
+      border-top: 1px solid var(--stroke-soft);
+      background: rgba(5, 5, 10, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 14px 28px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke-strong);
+      background: var(--bg-surface);
+      color: var(--text-heading);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--bg-surface-hover);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      border: none;
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #9f7aea, #60a5fa);
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ========================================
+      ENHANCED MARKDOWN TYPOGRAPHY
+      ========================================
+    */
+    .markdown-body {
+      max-width: 100%;
+      margin: 0 auto;
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--text-main);
+    }
+
+    .markdown-body h1, 
+    .markdown-body h2, 
+    .markdown-body h3 {
+      color: var(--text-heading);
+      font-weight: 600;
+      margin-top: 2em;
+      margin-bottom: 0.75em;
+      line-height: 1.3;
+    }
+
+    .markdown-body h1 { 
+      font-size: 2.25em; 
+      letter-spacing: -0.02em;
+    }
+    
+    .markdown-body h2 { 
+      font-size: 1.75em; 
+      letter-spacing: -0.01em;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid var(--stroke-soft);
+    }
+    
+    .markdown-body h3 { 
+      font-size: 1.35em; 
+      color: #e2e8f0;
+    }
+
+    /* Eliminate top margin for the very first element to align with padding */
+    .markdown-body > *:first-child { margin-top: 0; }
+
+    .markdown-body p {
+      margin-top: 0;
+      margin-bottom: 1.25em;
+    }
+
+    .markdown-body ul, 
+    .markdown-body ol {
+      margin-top: 0;
+      margin-bottom: 1.5em;
+      padding-left: 1.5em;
+    }
+
+    .markdown-body li {
+      margin-bottom: 0.5em;
+    }
+
+    .markdown-body li > ul, 
+    .markdown-body li > ol {
+      margin-top: 0.5em;
+    }
+
+    .markdown-body strong {
+      color: var(--text-heading);
+      font-weight: 600;
+    }
+
+    .markdown-body a {
+      color: var(--accent-secondary);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    .markdown-body a:hover {
+      border-bottom-color: var(--accent-secondary);
+    }
+
+    .markdown-body code {
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.2em 0.4em;
+      border-radius: 6px;
+      font-size: 0.9em;
+      color: #93c5fd; /* Light blue tint for inline code */
+    }
+
+    .markdown-body pre {
+      background: #0d1117;
+      border: 1px solid var(--stroke-soft);
+      border-radius: var(--radius-md);
+      padding: 1.25em;
+      overflow-x: auto;
+      margin-bottom: 1.5em;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .markdown-body pre code {
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      color: #e2e8f0;
+      font-size: 0.9em;
+      line-height: 1.6;
+    }
+
+    .markdown-body blockquote {
+      margin: 0 0 1.5em 0;
+      padding: 0.5em 0 0.5em 1.5em;
+      border-left: 4px solid var(--accent-primary);
+      color: var(--text-muted);
+      background: linear-gradient(to right, rgba(139, 92, 246, 0.05), transparent);
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+
+    .markdown-body blockquote p:last-child {
+      margin-bottom: 0;
+    }
+
+    .markdown-body hr {
+      border: none;
+      height: 1px;
+      background: var(--stroke-strong);
+      margin: 3em 0;
+    }
+
+    /* ========================================
+      TASK CARD STYLES (STRUCTURED CARDS)
+      ========================================
+    */
+    .task-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .task-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--stroke-soft);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .task-card:hover {
+      border-color: var(--stroke-strong);
+      transform: translateY(-2px);
+    }
+    .task-card h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.25em;
+      color: var(--accent-secondary);
+    }
+    .objective-card {
+      border-left: 4px solid var(--accent-primary);
+    }
+    .instructions-list {
+      padding-left: 20px;
+    }
+    .instructions-list li {
+      margin-bottom: 12px;
+    }
+    .criteria-checklist {
+      list-style: none;
+      padding-left: 0;
+    }
+    .criteria-checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .criteria-checklist li::before {
+      content: "✓";
+      color: #10b981;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* KaTeX overrides for dark mode */
+    .katex {
+      color: var(--text-heading);
+      font-size: 1.1em;
+    }
+
+    /* ========================================
+      TRANSITIONS & ANIMATIONS
+      ========================================
+    */
+    .transition-opacity { transition: opacity 400ms ease, transform 400ms ease; }
+    .opacity-100 { opacity: 1; transform: translateY(0); }
+    .opacity-0 { opacity: 0; transform: translateY(10px); }
+    .hidden { display: none !important; }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .transition-opacity { transition: none !important; }
+      .btn { transition: none !important; }
+      .topbar { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <textarea id="markdown-source" style="display:none;">
+    [
+  {
+    "id": "guide_page_1",
+    "content": "# Page 1 \u2014 Objective & Prerequisites\n\n## Objective\nImplement a reactor-selection and development workflow for delignification that matches the reactor type to the process goal:\n- **Batch** for screening, kinetics, and selectivity studies\n- **Flow-through** for transport-limited systems and improved product removal\n- **Continuous** for throughput, steady operation, and scale-up\n\nBy the end, you should be able to:\n1. Identify the dominant bottleneck in your delignification process.\n2. Choose a reactor configuration that addresses that bottleneck.\n3. Set up experiments that compare impregnation, lignin removal, carbohydrate preservation, and scale-up risk.\n\n## Technical prerequisites\n- Access to a **lab-scale batch reactor** with temperature and pressure control\n- Access to a **flow-through packed-bed or chip-bed reactor** with a pump and pressure monitoring\n- Access to a **continuous feeding system** or pilot-scale continuous pretreatment/cooking setup\n- Analytical capability for:\n  - **Kappa number** or residual lignin measurement\n  - **Carbohydrate composition** or viscosity/yield analysis\n  - **Liquid-phase lignin or dissolved solids** measurement\n- Feedstock characterization tools for:\n  - **Chip size distribution** or particle size analysis\n  - **Moisture content**\n  - **Bulk density/permeability**\n- Basic process data logging for **temperature, pressure, flow rate, solids loading, and residence time**\n\n## What to prepare before starting\n- A defined biomass feedstock: chips, particles, or pre-processed lignocellulosic material\n- A chosen chemistry: alkaline, sulfite, organosolv, oxidative, or other delignification system\n- A target outcome: maximum delignification, high selectivity, preserved carbohydrates, or process scale-up"
+  },
+  {
+    "id": "guide_page_2",
+    "content": "# Page 2 \u2014 Step 1: Start with a Batch Reactor to Map the Chemistry\n\n## Step 1. Define the operating window in batch\n### The Action\nRun a batch matrix across time, temperature, chemical charge, and solids loading.\n\n### Why it matters\nBatch reactors isolate the chemistry from many flow-related complications, making them ideal for identifying the fundamental delignification window.\n\n### How to do it\nUse a small design-of-experiments table such as:\n- 150\u2013170\u00b0C\n- 30\u2013120 min\n- Low, medium, and high alkali or reagent charge\n- Two or three solids loadings\n\n**Example template:**\n- Condition A: 160\u00b0C, 60 min, 15% solids, moderate alkali\n- Condition B: 170\u00b0C, 45 min, 15% solids, same alkali\n- Condition C: 160\u00b0C, 90 min, 20% solids, same alkali\n\n## Step 2. Measure both delignification and damage\n### The Action\nAnalyze each batch sample for lignin removal and carbohydrate preservation.\n\n### Why it matters\nA reactor is not successful if it removes lignin at the cost of excessive cellulose or hemicellulose loss.\n\n### How to do it\nTrack:\n- Residual lignin or **kappa number**\n- **Pulp yield**\n- **Viscosity** or cellulose integrity\n- Dissolved solids or lignin in liquor\n\n**Example template:**\nCreate a simple performance table:\n- High delignification + high yield = preferred zone\n- High delignification + low yield = overcooking risk\n- Low delignification + high yield = under-treatment\n\n## Step 3. Use batch data to identify transport limitations\n### The Action\nCompare results across chip size, mixing intensity, and impregnation time.\n\n### Why it matters\nIf performance changes strongly with particle size or mixing, transport is likely limiting the reaction.\n\n### How to do it\nTest:\n- Small vs. large chips\n- Pre-impregnation vs. direct heating\n- Agitated vs. minimally mixed batch operation\n\n**Example template:**\nIf smaller chips give much lower residual lignin at the same time/temperature, the process is transport-sensitive and may benefit from flow-through design."
+  },
+  {
+    "id": "guide_page_3",
+    "content": "# Page 3 \u2014 Step 2: Move to Flow-Through When Transport Limits Performance\n\n## Step 4. Build a flow-through test around your bottleneck\n### The Action\nConfigure a packed bed or chip bed and force liquor through the biomass.\n\n### Why it matters\nFlow-through can restore chemical access to the interior of the biomass and remove dissolved lignin fragments as they form.\n\n### How to do it\nSet up:\n- Uniform biomass packing\n- A pump with stable flow control\n- Pressure sensors at inlet and outlet\n- Sampling ports for inlet and outlet liquor\n\n**Example template:**\nRun at 0.5, 1.0, and 2.0 bed volumes per hour to compare chemical penetration and pressure drop.\n\n## Step 5. Monitor permeability, pressure drop, and channeling\n### The Action\nMeasure how easily liquor passes through the bed during operation.\n\n### Why it matters\nA flow-through reactor only works well if the liquid is distributed evenly; channeling creates local overprocessing and underprocessing.\n\n### How to do it\nTrack:\n- Differential pressure across the bed\n- Flow uniformity over time\n- Signs of channeling or bed collapse\n- Swelling behavior of biomass during cooking\n\n**Example template:**\nIf pressure rises sharply and outlet lignin drops unevenly, the bed may be compacting or channeling.\n\n## Step 6. Compare transport-reaction performance against batch\n### The Action\nRun matched conditions in batch and flow-through and compare outcomes.\n\n### Why it matters\nThis reveals whether flow-through improves delignification because of better transport, better product removal, or both.\n\n### How to do it\nCompare:\n- Residual lignin at the same severity\n- Carbohydrate retention\n- Dissolved lignin profile in effluent\n- Uniformity across the biomass bed\n\n**Example template:**\nIf flow-through gives lower kappa number at the same chemical charge with less carbohydrate loss, it is likely reducing mass-transfer limitations and secondary reactions."
+  },
+  {
+    "id": "guide_page_4",
+    "content": "# Page 4 \u2014 Step 3: Decide When to Scale to Continuous Operation\n\n## Step 7. Assess readiness for continuous processing\n### The Action\nCheck whether your chemistry and feedstock can tolerate stable feeding and residence-time control.\n\n### Why it matters\nContinuous reactors solve throughput and integration problems, but they require consistent feed and robust process control.\n\n### How to do it\nConfirm that you can control:\n- Feed rate\n- Solids concentration\n- Impregnation quality\n- Temperature stability\n- Residence-time distribution\n\n**Example template:**\nIf your chip moisture and size vary widely, first standardize feed preparation before moving continuous.\n\n## Step 8. Design the continuous process around quality, not just throughput\n### The Action\nSet quality targets and then tune the reactor to meet them continuously.\n\n### Why it matters\nA continuous system is only useful if product quality remains stable while throughput increases.\n\n### How to do it\nDefine targets such as:\n- Maximum allowable kappa number\n- Minimum yield\n- Maximum carbohydrate loss\n- Acceptable viscosity range\n\n**Example template:**\nAdjust residence time and chemical charge until the continuous output matches the best batch or flow-through quality at steady state.\n\n## Step 9. Use a decision framework to choose the reactor\n### The Action\nSelect the reactor type based on the main process objective.\n\n### Why it matters\nThe best reactor is the one that solves the dominant bottleneck, not the one that is simplest in abstract.\n\n### How to do it\nUse this rule of thumb:\n- **Batch**: best for learning, screening, and kinetic modeling\n- **Flow-through**: best for transport-limited biomass and improved impregnation/product removal\n- **Continuous**: best for stable large-scale production and downstream integration\n\n**Example template:**\n- If your main problem is \u201cI need to understand the chemistry,\u201d choose **batch**.\n- If your main problem is \u201cthe chip interior is underdelignified,\u201d choose **flow-through**.\n- If your main problem is \u201cI need consistent industrial output,\u201d choose **continuous**.\n\n## Step 10. Validate scale-up with the four key questions\n### The Action\nBefore scaling, test the reactor against four criteria.\n\n### Why it matters\nThese four questions predict whether the design will remain effective beyond the lab.\n\n### How to do it\nAsk:\n1. How well does it impregnate biomass?\n2. How effectively does it remove dissolved lignin fragments?\n3. How uniform is treatment across chips or particles?\n4. How easy is it to scale and integrate with recovery?\n\n**Example template:**\nScore each reactor from 1 to 5 on each question. Choose the design with the best overall balance for your target objective."
+  }
+]
+  </textarea>
+
+  <main>
+    <section id="lesson-app" style="width: 100%;">
+      <div class="view-shell">
+        <div class="view-inner">
+          <div class="topbar">
+            <div class="badge">
+              <span class="dot"></span>
+              <span>Practical Guide</span>
+            </div>
+            <h1 class="title">Practical Guide</h1>
+            <p class="subtitle">A step-by-step walkthrough of the implementation.</p>
+          </div>
+
+          <div class="grid">
+            <div class="card">
+              <div class="card-b">
+                <div id="sections-wrapper">
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav">
+          <button type="button" class="btn" id="prevBtn" aria-label="Previous section">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Previous</span>
+          </button>
+          <button type="button" class="btn btn-primary" id="nextBtn" aria-label="Next section">
+            <span>Continue to Next</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  (function () {
+  // ==========================================
+  // 1. HELPER FUNCTIONS
+  // ==========================================
+
+  function escapeHtml(s){
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function simpleMarkdownToHtml(md){
+    var lines = String(md || '').replace(/\r\n/g, '\n').split('\n');
+    var html = [];
+    var inCodeFence = false;
+    var codeLang = '';
+    var codeBuf = [];
+
+    function flushCode(){
+      if(!codeBuf.length) return;
+      var code = escapeHtml(codeBuf.join('\n'));
+      html.push('<pre><code' + (codeLang ? ' class="language-' + escapeHtml(codeLang) + '"' : '') + '>' + code + '</code></pre>');
+      codeBuf = [];
+      codeLang = '';
+    }
+
+    for(var i=0;i<lines.length;i++){
+      var line = lines[i];
+
+      var fenceMatch = line.match(/^\s*```(\w+)?\s*$/);
+      if(fenceMatch){
+        if(!inCodeFence){
+          inCodeFence = true;
+          codeLang = fenceMatch[1] || '';
+          codeBuf = [];
+        } else {
+          inCodeFence = false;
+          flushCode();
+        }
+        continue;
+      }
+
+      if(inCodeFence){
+        codeBuf.push(line);
+        continue;
+      }
+
+      if(/^\s*---\s*$/.test(line)){
+        html.push('<hr/>');
+        continue;
+      }
+
+      var headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+      if(headingMatch){
+        var level = headingMatch[1].length;
+        var text = headingMatch[2].trim();
+        html.push('<h' + level + '>' + renderInline(text) + '</h' + level + '>');
+        continue;
+      }
+
+      var ulMatch = line.match(/^\s*-\s+(.*)$/);
+      if(ulMatch){
+        var items = [];
+        while(i < lines.length && (m = lines[i].match(/^\s*-\s+(.*)$/))){
+          items.push('<li>' + renderInline(m[1].trim()) + '</li>');
+          i++;
+        }
+        i--;
+        html.push('<ul>' + items.join('') + '</ul>');
+        continue;
+      }
+
+      if(line.trim() === ''){
+        continue;
+      }
+
+      html.push('<p>' + renderInline(line.trim()) + '</p>');
+    }
+
+    flushCode();
+    return html.join('');
+
+    function renderInline(text){
+      var out = escapeHtml(text);
+      out = out.replace(/`([^`]+)`/g, function(_, code){ return '<code>' + code + '</code>'; });
+      out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      return out;
+    }
+  }
+
+  // ==========================================
+  // 2. DATA EXTRACTION & DYNAMIC PAGE CREATION
+  // ==========================================
+
+  var rawEl = document.getElementById('markdown-source');
+  var raw = rawEl ? rawEl.value : '[]';
+
+  var lessonParts;
+  try {
+    var parsedData = JSON.parse(raw.trim());
+    // UPDATED LOGIC: Handle both a direct array or the `{ parts: [...] }` object structure
+    lessonParts = Array.isArray(parsedData) ? parsedData : (parsedData.parts || []);
+  } catch(e) {
+    lessonParts = []; 
+  }
+  if(!Array.isArray(lessonParts)) lessonParts = [];
+
+  var wrapper = document.getElementById('sections-wrapper');
+  if (wrapper) wrapper.innerHTML = ''; 
+
+  lessonParts.forEach(function(part) {
+    var article = document.createElement('article');
+    article.id = part.id;
+    article.className = 'lesson-section transition-opacity duration-300 opacity-0 hidden';
+    
+    var innerDiv = document.createElement('div');
+    innerDiv.className = 'markdown-body';
+    innerDiv.setAttribute('data-content-target', part.id);
+    
+    article.appendChild(innerDiv);
+    if (wrapper) wrapper.appendChild(article);
+  });
+
+  // ==========================================
+  // 3. MARKDOWN PARSING & INJECTION
+  // ==========================================
+
+  var hasMarked = typeof window.marked !== 'undefined' && window.marked && typeof window.marked.parse === 'function';
+  
+  if(hasMarked){
+    try{
+      // Attach the KaTeX extension so formulas render properly
+      if (typeof window.markedKatex !== 'undefined') {
+        window.marked.use(window.markedKatex({
+          throwOnError: false,
+          output: 'html'
+        }));
+      }
+      window.marked.setOptions({ breaks: false, gfm: true });
+    }catch(e){}
+  }
+
+  lessonParts.forEach(function (part) {
+    var target = document.querySelector('[data-content-target="' + part.id + '"]');
+    if (target) {
+      var content = (part.content || '').trim();
+      // If the content starts with an HTML tag, inject it directly to bypass Markdown escaping
+      if (content.startsWith('<')) {
+        target.innerHTML = content;
+      } else {
+        target.innerHTML = hasMarked ? window.marked.parse(content) : simpleMarkdownToHtml(content);
+      }
+    }
+  });
+
+  // ==========================================
+  // 4. NAVIGATION STATE & LOGIC
+  // ==========================================
+
+  var sections = lessonParts
+    .map(function(part){ return document.getElementById(part.id); })
+    .filter(Boolean);
+
+  var currentIndex = 0; 
+
+  var contentStatus = document.getElementById('content-status');
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+
+  function updateMeta(index) {
+    if(contentStatus) contentStatus.textContent = 'Section ' + (index + 1) + ' of ' + lessonParts.length;
+
+    var atFirst = index === 0;
+    var atLast = index === lessonParts.length - 1;
+
+    if(prevBtn){
+      prevBtn.disabled = atFirst;
+    }
+    if(nextBtn){
+      nextBtn.disabled = atLast;
+    }
+    
+    var cardElement = document.querySelector('.card');
+    if(cardElement && window.scrollY > cardElement.offsetTop) {
+        window.scrollTo({ top: cardElement.offsetTop - 20, behavior: 'smooth' });
+    }
+  }
+
+  function showSection(index) {
+    if(!sections.length) return;
+    sections.forEach(function (section, i) {
+      if (i === index) {
+        section.classList.remove('hidden');
+        requestAnimationFrame(function () {
+          section.classList.remove('opacity-0');
+          section.classList.add('opacity-100');
+        });
+      } else {
+        section.classList.add('opacity-0');
+        section.classList.remove('opacity-100');
+        section.classList.add('hidden');
+      }
+    });
+    currentIndex = index;
+    updateMeta(index);
+  }
+
+  function transitionTo(index) {
+    if(!sections.length) return;
+    if (index < 0 || index >= sections.length || index === currentIndex) return;
+
+    var current = sections[currentIndex];
+    if(!current) return;
+
+    current.classList.add('opacity-0');
+    current.classList.remove('opacity-100');
+
+    window.setTimeout(function () {
+      current.classList.add('hidden'); 
+      
+      var next = sections[index];
+      if(!next) return;
+
+      next.classList.remove('hidden'); 
+      requestAnimationFrame(function () {
+        next.classList.remove('opacity-0');
+        next.classList.add('opacity-100');
+      });
+
+      currentIndex = index;
+      updateMeta(index);
+    }, 400);
+  }
+
+  // ==========================================
+  // 5. EVENT LISTENERS & INITIALIZATION
+  // ==========================================
+
+  if(prevBtn) prevBtn.addEventListener('click', function () { transitionTo(currentIndex - 1); });
+  if(nextBtn) nextBtn.addEventListener('click', function () { transitionTo(currentIndex + 1); });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'ArrowLeft') transitionTo(currentIndex - 1);
+    if (event.key === 'ArrowRight') transitionTo(currentIndex + 1);
+  });
+
+  if(sections.length) {
+    showSection(0);
+  } else {
+    updateMeta(0); 
+  }
+
+})();
+  </script>
+</body>
+</html>

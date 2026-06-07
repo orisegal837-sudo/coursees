@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson Module - Agent Task Suites and Evaluation Rubrics</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked-katex-extension/lib/index.umd.js"></script>
+
+  <script>
+    // Minimal Tailwind shim (used only if CDN fails). This keeps the page functional without external deps.
+    (function(){
+      var ok = true;
+      try{
+        if(!window.tailwind) ok = false;
+      }catch(e){ ok = false; }
+    })();
+  </script>
+  <style>
+    /* ========================================
+      PREMIUM THEME & TYPOGRAPHY VARIABLES
+      ========================================
+    */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root{
+      --bg-base: #05050a;
+      --bg-surface: rgba(17, 18, 28, 0.65);
+      --bg-surface-hover: rgba(255, 255, 255, 0.05);
+      
+      --stroke-soft: rgba(255, 255, 255, 0.08);
+      --stroke-strong: rgba(255, 255, 255, 0.15);
+      
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-heading: #ffffff;
+      
+      --accent-primary: #8b5cf6;
+      --accent-secondary: #3b82f6;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      
+      --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --shadow-glow: 0 0 40px rgba(139, 92, 246, 0.15);
+      
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      
+      --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      
+      /* New Wider Content Width */
+      --content-max-width: 1200px; 
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      /* Dynamic ambient background */
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.08), transparent 40%),
+        radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.08), transparent 40%);
+      background-attachment: fixed;
+    }
+
+    /* ========================================
+      LAYOUT & SHELL
+      ========================================
+    */
+    main {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .view-shell {
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    
+    .view-inner {
+      padding: clamp(20px, 4vw, 48px) 24px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ========================================
+      TOP HEADER & TYPOGRAPHY
+      ========================================
+    */
+    .topbar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+      margin-bottom: 40px;
+      width: 100%;
+      max-width: var(--content-max-width);
+      animation: fadeDown 0.6s ease-out;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border: 1px solid var(--stroke-strong);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 999px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent-gradient);
+      box-shadow: 0 0 8px var(--accent-primary);
+    }
+
+    .title {
+      margin: 8px 0 0 0;
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--text-heading);
+      background: linear-gradient(to right, #ffffff, #a5b4fc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: clamp(16px, 1.5vw, 18px);
+      line-height: 1.6;
+      max-width: 60ch;
+    }
+
+    /* ========================================
+      MAIN CARD (WIDER VIEWPORT)
+      ========================================
+    */
+    .grid {
+      display: flex;
+      width: 100%;
+      justify-content: center;
+      flex-grow: 1;
+    }
+
+    .card {
+      width: 100%;
+      max-width: var(--content-max-width);
+      border: 1px solid var(--stroke-soft);
+      background: var(--bg-surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-soft), var(--shadow-glow);
+    }
+
+    .card-h {
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--stroke-soft);
+      background: rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-h h2 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .card-b {
+      padding: clamp(24px, 5vw, 56px);
+      flex-grow: 1;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #c4b5fd;
+    }
+
+    /* ========================================
+      NAVIGATION BOTTOM BAR
+      ========================================
+    */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 24px;
+      border-top: 1px solid var(--stroke-soft);
+      background: rgba(5, 5, 10, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 14px 28px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke-strong);
+      background: var(--bg-surface);
+      color: var(--text-heading);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--bg-surface-hover);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      border: none;
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #9f7aea, #60a5fa);
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ========================================
+      ENHANCED MARKDOWN TYPOGRAPHY
+      ========================================
+    */
+    .markdown-body {
+      max-width: 100%;
+      margin: 0 auto;
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--text-main);
+    }
+
+    .markdown-body h1, 
+    .markdown-body h2, 
+    .markdown-body h3 {
+      color: var(--text-heading);
+      font-weight: 600;
+      margin-top: 2em;
+      margin-bottom: 0.75em;
+      line-height: 1.3;
+    }
+
+    .markdown-body h1 { 
+      font-size: 2.25em; 
+      letter-spacing: -0.02em;
+    }
+    
+    .markdown-body h2 { 
+      font-size: 1.75em; 
+      letter-spacing: -0.01em;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid var(--stroke-soft);
+    }
+    
+    .markdown-body h3 { 
+      font-size: 1.35em; 
+      color: #e2e8f0;
+    }
+
+    /* Eliminate top margin for the very first element to align with padding */
+    .markdown-body > *:first-child { margin-top: 0; }
+
+    .markdown-body p {
+      margin-top: 0;
+      margin-bottom: 1.25em;
+    }
+
+    .markdown-body ul, 
+    .markdown-body ol {
+      margin-top: 0;
+      margin-bottom: 1.5em;
+      padding-left: 1.5em;
+    }
+
+    .markdown-body li {
+      margin-bottom: 0.5em;
+    }
+
+    .markdown-body li > ul, 
+    .markdown-body li > ol {
+      margin-top: 0.5em;
+    }
+
+    .markdown-body strong {
+      color: var(--text-heading);
+      font-weight: 600;
+    }
+
+    .markdown-body a {
+      color: var(--accent-secondary);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    .markdown-body a:hover {
+      border-bottom-color: var(--accent-secondary);
+    }
+
+    .markdown-body code {
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.2em 0.4em;
+      border-radius: 6px;
+      font-size: 0.9em;
+      color: #93c5fd; /* Light blue tint for inline code */
+    }
+
+    .markdown-body pre {
+      background: #0d1117;
+      border: 1px solid var(--stroke-soft);
+      border-radius: var(--radius-md);
+      padding: 1.25em;
+      overflow-x: auto;
+      margin-bottom: 1.5em;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .markdown-body pre code {
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      color: #e2e8f0;
+      font-size: 0.9em;
+      line-height: 1.6;
+    }
+
+    .markdown-body blockquote {
+      margin: 0 0 1.5em 0;
+      padding: 0.5em 0 0.5em 1.5em;
+      border-left: 4px solid var(--accent-primary);
+      color: var(--text-muted);
+      background: linear-gradient(to right, rgba(139, 92, 246, 0.05), transparent);
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+
+    .markdown-body blockquote p:last-child {
+      margin-bottom: 0;
+    }
+
+    .markdown-body hr {
+      border: none;
+      height: 1px;
+      background: var(--stroke-strong);
+      margin: 3em 0;
+    }
+
+    /* ========================================
+      TASK CARD STYLES (STRUCTURED CARDS)
+      ========================================
+    */
+    .task-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .task-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--stroke-soft);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .task-card:hover {
+      border-color: var(--stroke-strong);
+      transform: translateY(-2px);
+    }
+    .task-card h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.25em;
+      color: var(--accent-secondary);
+    }
+    .objective-card {
+      border-left: 4px solid var(--accent-primary);
+    }
+    .instructions-list {
+      padding-left: 20px;
+    }
+    .instructions-list li {
+      margin-bottom: 12px;
+    }
+    .criteria-checklist {
+      list-style: none;
+      padding-left: 0;
+    }
+    .criteria-checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .criteria-checklist li::before {
+      content: "✓";
+      color: #10b981;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* KaTeX overrides for dark mode */
+    .katex {
+      color: var(--text-heading);
+      font-size: 1.1em;
+    }
+
+    /* ========================================
+      TRANSITIONS & ANIMATIONS
+      ========================================
+    */
+    .transition-opacity { transition: opacity 400ms ease, transform 400ms ease; }
+    .opacity-100 { opacity: 1; transform: translateY(0); }
+    .opacity-0 { opacity: 0; transform: translateY(10px); }
+    .hidden { display: none !important; }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .transition-opacity { transition: none !important; }
+      .btn { transition: none !important; }
+      .topbar { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <textarea id="markdown-source" style="display:none;">
+    [
+  {
+    "id": "guide_page_1",
+    "content": "# Page 1 \u2014 Objective & Prerequisites\n\n## Objective\nBuild a **parameterized quantum circuit (PQC)** workflow you can use as the backbone of a NISQ-era hybrid algorithm. By the end, you should be able to:\n\n1. **Choose an ansatz** for a given task.\n2. **Implement tunable rotation and entangling layers**.\n3. **Connect the quantum circuit to a classical optimizer**.\n4. **Evaluate the trade-off** between expressibility, trainability, and hardware compatibility.\n\n## Technical Prerequisites\nUse one of the following frameworks and have access to a simulator or quantum backend:\n\n- **Python 3.10+**\n- **PennyLane 0.35+** with a simulator backend such as `default.qubit`\n- or **Qiskit 1.x** with `AerSimulator`\n- **NumPy** and **SciPy** for optimization\n- Optional but useful:\n  - **Pytorch / JAX / TensorFlow** if you want differentiable training loops\n  - Access to a real quantum device via **IBM Quantum** or **Amazon Braket**\n\n## What you need before coding\n- A clear **problem definition**: VQE, QAOA, classifier, control task, or a toy target state.\n- A small initial qubit count: **2\u20136 qubits** is ideal for learning and debugging.\n- A measurement goal: expectation value, probability distribution, or classification score.\n\n## Example setup target\nStart with a simple objective such as:\n- minimize the expectation value of a 2-qubit Hamiltonian,\n- or classify two data points using a 2-qubit variational circuit.\n\n**Why this matters:** PQCs are only useful when the circuit structure and the optimization target are defined together. The ansatz is not an isolated circuit; it is the model class inside a hybrid loop."
+  },
+  {
+    "id": "guide_page_2",
+    "content": "# Page 2 \u2014 Build the Core PQC Loop\n\n## Step 1: Define the quantum task and cost function\n\n**Action:** Choose a measurable objective the classical optimizer can minimize.\n\n**Why:** The optimizer needs a scalar value such as energy, loss, or error rate.\n\n**How (example):**\n- For VQE: minimize `\u27e8\u03c8(\u03b8)|H|\u03c8(\u03b8)\u27e9`\n- For classification: minimize cross-entropy based on measured probabilities\n- For control: minimize distance to a target unitary or state\n\n```python\n# Example: energy cost for a simple Hamiltonian\nH = Z0 + 0.5 * X0 X1\ncost(theta) = expectation_value(circuit(theta), H)\n```\n\n## Step 2: Choose a circuit skeleton\n\n**Action:** Split the circuit into three parts: state preparation, parameterized block, and measurement.\n\n**Why:** This makes the circuit modular and easier to tune or replace.\n\n**How (example):**\n- **State prep:** initialize `|0...0\u27e9` or load feature data\n- **Parameterized block:** apply `Ry(\u03b8)`, `Rz(\u03c6)`, and entanglers\n- **Measurement:** measure `Z`, probabilities, or observables\n\nTemplate:\n```text\n|0> -- prep -- [Ry, Rz] -- entangle -- [Ry, Rz] -- measure\n```\n\n## Step 3: Implement a minimal ansatz\n\n**Action:** Start with a shallow layered ansatz.\n\n**Why:** A small circuit is easier to debug and less likely to suffer from poor optimization behavior.\n\n**How (example):**\nUse a repeated block like:\n1. single-qubit rotations on all qubits,\n2. a ring of CNOT or CZ gates,\n3. repeat for 1\u20133 layers.\n\nExample structure:\n```python\nLayer 1: Ry(q0, \u03b80), Rz(q0, \u03b81), Ry(q1, \u03b82), Rz(q1, \u03b83)\nEntangle: CNOT(q0 -> q1)\nLayer 2: Ry(q0, \u03b84), Rz(q0, \u03b85), Ry(q1, \u03b86), Rz(q1, \u03b87)\n```\n\n## Step 4: Connect to a classical optimizer\n\n**Action:** Feed the cost function into an optimizer such as COBYLA, SPSA, Adam, or Nelder-Mead.\n\n**Why:** PQCs become powerful only when the classical optimizer updates parameters using quantum measurements.\n\n**How (example):**\n- Initialize random parameters.\n- Run the circuit.\n- Estimate the cost.\n- Update parameters.\n- Repeat until convergence.\n\n```python\nfrom scipy.optimize import minimize\nresult = minimize(cost, x0=initial_theta, method=\"COBYLA\")\n```\n\n## Step 5: Validate on a simulator first\n\n**Action:** Test your circuit on a noiseless simulator before using hardware.\n\n**Why:** This isolates circuit design problems from device noise and compilation issues.\n\n**How (example):**\n- Verify the output shape\n- Check that parameters change the output smoothly\n- Confirm the cost decreases over iterations"
+  },
+  {
+    "id": "guide_page_3",
+    "content": "# Page 3 \u2014 Design a Better Ansatz\n\n## Step 6: Improve expressibility without overcomplicating the circuit\n\n**Action:** Add complexity gradually: more layers, more entanglement, or problem-inspired gates.\n\n**Why:** Expressibility determines whether the circuit can reach useful target states, but too much complexity can damage trainability.\n\n**How (example):**\nTry progression in this order:\n1. 1 layer of rotations + entanglement\n2. 2 layers with alternating `Ry/Rz`\n3. add a second entangling pattern, such as nearest-neighbor plus wrap-around\n\nIf a shallow circuit underfits, increase depth by one layer at a time.\n\n## Step 7: Balance trainability against barren plateaus\n\n**Action:** Monitor gradients or cost improvement as the circuit grows.\n\n**Why:** Deep or random circuits can become difficult to optimize because gradients shrink or the landscape becomes noisy.\n\n**How (example):**\n- Run several random initializations.\n- Measure gradient norms.\n- Compare convergence speed across depths.\n\nPractical rule:\n- If gradients vanish quickly, reduce depth, reduce randomness, or add structure.\n- If optimization is stable but accuracy is poor, increase expressiveness carefully.\n\n## Step 8: Match the ansatz to hardware connectivity\n\n**Action:** Use entanglers supported natively by the device and respect qubit connectivity.\n\n**Why:** Hardware-aware circuits need less compilation, fewer swaps, and usually lower error.\n\n**How (example):**\n- On a linear device: entangle neighboring qubits only.\n- On IBM hardware: prefer native `CX` patterns aligned with coupling maps.\n- On a CZ-native device: use `CZ` instead of forcing non-native gates.\n\n## Step 9: Preserve symmetry when the problem has it\n\n**Action:** Build the ansatz so it respects conserved quantities such as particle number, parity, or spin.\n\n**Why:** Symmetry reduces the search space and prevents the optimizer from exploring irrelevant states.\n\n**How (example):**\n- In chemistry VQE, use particle-number-preserving excitations.\n- In spin systems, preserve parity with symmetry-respecting entangling blocks.\n- In optimization problems, use structure derived from the cost graph.\n\n## Step 10: Compare ansatz options systematically\n\n**Action:** Test multiple ans\u00e4tze under the same optimization budget.\n\n**Why:** The best ansatz is determined by performance, not by appearance or depth alone.\n\n**How (example):**\nCompare:\n- hardware-efficient ansatz\n- problem-inspired ansatz\n- shallow layered ansatz\n\nMeasure:\n- final cost\n- number of iterations to converge\n- number of circuit evaluations\n- sensitivity to noise"
+  },
+  {
+    "id": "guide_page_4",
+    "content": "# Page 4 \u2014 Practical Decision Rules and Deployment\n\n## Step 11: Use a design checklist before training at scale\n\n**Action:** Ask these three questions before you commit to a circuit design:\n1. What states do I need the circuit to represent?\n2. What gates does my hardware run efficiently?\n3. How many parameters can my optimizer handle?\n\n**Why:** These three constraints determine whether the ansatz will be usable in practice.\n\n**How (example):**\n- If you need strong chemistry structure, choose a problem-inspired ansatz.\n- If you need fast prototyping on real hardware, choose a hardware-efficient ansatz.\n- If optimization is unstable, reduce parameters or add symmetry.\n\n## Step 12: Move from simulator to hardware carefully\n\n**Action:** When the simulator version works, run the same circuit on hardware with shot-based execution.\n\n**Why:** Real devices introduce noise, finite shots, and connectivity constraints that can change performance.\n\n**How (example):**\n- Increase shot count for noisy expectation values.\n- Use measurement grouping where possible.\n- Re-optimize initial learning rate or optimizer settings for hardware noise.\n\n## Step 13: Iterate on the ansatz, not just the optimizer\n\n**Action:** If training fails, change circuit structure before endlessly tuning optimizer settings.\n\n**Why:** Many failures come from a poor ansatz, not from the optimizer itself.\n\n**How (example):**\nIf loss plateaus:\n- reduce depth,\n- replace random layers with structured blocks,\n- enforce symmetry,\n- switch entanglement pattern,\n- then retry training.\n\n## Final takeaway\nA good PQC ansatz is **expressive enough to solve the task, trainable enough to optimize reliably, and hardware-aware enough to run efficiently**. In practice, the best design is usually a compact, structured circuit with tunable rotations, targeted entanglement, and symmetry aligned to the problem."
+  }
+]
+  </textarea>
+
+  <main>
+    <section id="lesson-app" style="width: 100%;">
+      <div class="view-shell">
+        <div class="view-inner">
+          <div class="topbar">
+            <div class="badge">
+              <span class="dot"></span>
+              <span>Practical Guide</span>
+            </div>
+            <h1 class="title">Practical Guide</h1>
+            <p class="subtitle">A step-by-step walkthrough of the implementation.</p>
+          </div>
+
+          <div class="grid">
+            <div class="card">
+              <div class="card-b">
+                <div id="sections-wrapper">
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav">
+          <button type="button" class="btn" id="prevBtn" aria-label="Previous section">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Previous</span>
+          </button>
+          <button type="button" class="btn btn-primary" id="nextBtn" aria-label="Next section">
+            <span>Continue to Next</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  (function () {
+  // ==========================================
+  // 1. HELPER FUNCTIONS
+  // ==========================================
+
+  function escapeHtml(s){
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function simpleMarkdownToHtml(md){
+    var lines = String(md || '').replace(/\r\n/g, '\n').split('\n');
+    var html = [];
+    var inCodeFence = false;
+    var codeLang = '';
+    var codeBuf = [];
+
+    function flushCode(){
+      if(!codeBuf.length) return;
+      var code = escapeHtml(codeBuf.join('\n'));
+      html.push('<pre><code' + (codeLang ? ' class="language-' + escapeHtml(codeLang) + '"' : '') + '>' + code + '</code></pre>');
+      codeBuf = [];
+      codeLang = '';
+    }
+
+    for(var i=0;i<lines.length;i++){
+      var line = lines[i];
+
+      var fenceMatch = line.match(/^\s*```(\w+)?\s*$/);
+      if(fenceMatch){
+        if(!inCodeFence){
+          inCodeFence = true;
+          codeLang = fenceMatch[1] || '';
+          codeBuf = [];
+        } else {
+          inCodeFence = false;
+          flushCode();
+        }
+        continue;
+      }
+
+      if(inCodeFence){
+        codeBuf.push(line);
+        continue;
+      }
+
+      if(/^\s*---\s*$/.test(line)){
+        html.push('<hr/>');
+        continue;
+      }
+
+      var headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+      if(headingMatch){
+        var level = headingMatch[1].length;
+        var text = headingMatch[2].trim();
+        html.push('<h' + level + '>' + renderInline(text) + '</h' + level + '>');
+        continue;
+      }
+
+      var ulMatch = line.match(/^\s*-\s+(.*)$/);
+      if(ulMatch){
+        var items = [];
+        while(i < lines.length && (m = lines[i].match(/^\s*-\s+(.*)$/))){
+          items.push('<li>' + renderInline(m[1].trim()) + '</li>');
+          i++;
+        }
+        i--;
+        html.push('<ul>' + items.join('') + '</ul>');
+        continue;
+      }
+
+      if(line.trim() === ''){
+        continue;
+      }
+
+      html.push('<p>' + renderInline(line.trim()) + '</p>');
+    }
+
+    flushCode();
+    return html.join('');
+
+    function renderInline(text){
+      var out = escapeHtml(text);
+      out = out.replace(/`([^`]+)`/g, function(_, code){ return '<code>' + code + '</code>'; });
+      out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      return out;
+    }
+  }
+
+  // ==========================================
+  // 2. DATA EXTRACTION & DYNAMIC PAGE CREATION
+  // ==========================================
+
+  var rawEl = document.getElementById('markdown-source');
+  var raw = rawEl ? rawEl.value : '[]';
+
+  var lessonParts;
+  try {
+    var parsedData = JSON.parse(raw.trim());
+    // UPDATED LOGIC: Handle both a direct array or the `{ parts: [...] }` object structure
+    lessonParts = Array.isArray(parsedData) ? parsedData : (parsedData.parts || []);
+  } catch(e) {
+    lessonParts = []; 
+  }
+  if(!Array.isArray(lessonParts)) lessonParts = [];
+
+  var wrapper = document.getElementById('sections-wrapper');
+  if (wrapper) wrapper.innerHTML = ''; 
+
+  lessonParts.forEach(function(part) {
+    var article = document.createElement('article');
+    article.id = part.id;
+    article.className = 'lesson-section transition-opacity duration-300 opacity-0 hidden';
+    
+    var innerDiv = document.createElement('div');
+    innerDiv.className = 'markdown-body';
+    innerDiv.setAttribute('data-content-target', part.id);
+    
+    article.appendChild(innerDiv);
+    if (wrapper) wrapper.appendChild(article);
+  });
+
+  // ==========================================
+  // 3. MARKDOWN PARSING & INJECTION
+  // ==========================================
+
+  var hasMarked = typeof window.marked !== 'undefined' && window.marked && typeof window.marked.parse === 'function';
+  
+  if(hasMarked){
+    try{
+      // Attach the KaTeX extension so formulas render properly
+      if (typeof window.markedKatex !== 'undefined') {
+        window.marked.use(window.markedKatex({
+          throwOnError: false,
+          output: 'html'
+        }));
+      }
+      window.marked.setOptions({ breaks: false, gfm: true });
+    }catch(e){}
+  }
+
+  lessonParts.forEach(function (part) {
+    var target = document.querySelector('[data-content-target="' + part.id + '"]');
+    if (target) {
+      var content = (part.content || '').trim();
+      // If the content starts with an HTML tag, inject it directly to bypass Markdown escaping
+      if (content.startsWith('<')) {
+        target.innerHTML = content;
+      } else {
+        target.innerHTML = hasMarked ? window.marked.parse(content) : simpleMarkdownToHtml(content);
+      }
+    }
+  });
+
+  // ==========================================
+  // 4. NAVIGATION STATE & LOGIC
+  // ==========================================
+
+  var sections = lessonParts
+    .map(function(part){ return document.getElementById(part.id); })
+    .filter(Boolean);
+
+  var currentIndex = 0; 
+
+  var contentStatus = document.getElementById('content-status');
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+
+  function updateMeta(index) {
+    if(contentStatus) contentStatus.textContent = 'Section ' + (index + 1) + ' of ' + lessonParts.length;
+
+    var atFirst = index === 0;
+    var atLast = index === lessonParts.length - 1;
+
+    if(prevBtn){
+      prevBtn.disabled = atFirst;
+    }
+    if(nextBtn){
+      nextBtn.disabled = atLast;
+    }
+    
+    var cardElement = document.querySelector('.card');
+    if(cardElement && window.scrollY > cardElement.offsetTop) {
+        window.scrollTo({ top: cardElement.offsetTop - 20, behavior: 'smooth' });
+    }
+  }
+
+  function showSection(index) {
+    if(!sections.length) return;
+    sections.forEach(function (section, i) {
+      if (i === index) {
+        section.classList.remove('hidden');
+        requestAnimationFrame(function () {
+          section.classList.remove('opacity-0');
+          section.classList.add('opacity-100');
+        });
+      } else {
+        section.classList.add('opacity-0');
+        section.classList.remove('opacity-100');
+        section.classList.add('hidden');
+      }
+    });
+    currentIndex = index;
+    updateMeta(index);
+  }
+
+  function transitionTo(index) {
+    if(!sections.length) return;
+    if (index < 0 || index >= sections.length || index === currentIndex) return;
+
+    var current = sections[currentIndex];
+    if(!current) return;
+
+    current.classList.add('opacity-0');
+    current.classList.remove('opacity-100');
+
+    window.setTimeout(function () {
+      current.classList.add('hidden'); 
+      
+      var next = sections[index];
+      if(!next) return;
+
+      next.classList.remove('hidden'); 
+      requestAnimationFrame(function () {
+        next.classList.remove('opacity-0');
+        next.classList.add('opacity-100');
+      });
+
+      currentIndex = index;
+      updateMeta(index);
+    }, 400);
+  }
+
+  // ==========================================
+  // 5. EVENT LISTENERS & INITIALIZATION
+  // ==========================================
+
+  if(prevBtn) prevBtn.addEventListener('click', function () { transitionTo(currentIndex - 1); });
+  if(nextBtn) nextBtn.addEventListener('click', function () { transitionTo(currentIndex + 1); });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'ArrowLeft') transitionTo(currentIndex - 1);
+    if (event.key === 'ArrowRight') transitionTo(currentIndex + 1);
+  });
+
+  if(sections.length) {
+    showSection(0);
+  } else {
+    updateMeta(0); 
+  }
+
+})();
+  </script>
+</body>
+</html>

@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson Module - Agent Task Suites and Evaluation Rubrics</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js">
+    // Minimal Tailwind shim (used only if CDN fails). This keeps the page functional without external deps.
+    (function(){
+      var ok = true;
+      try{
+        if(!window.tailwind) ok = false;
+      }catch(e){ ok = false; }
+    })();
+    
+  </script>
+  <style>
+    :root{
+      --bg: #0b1220;
+      --panel: rgba(255,255,255,.06);
+      --panel-2: rgba(255,255,255,.08);
+      --stroke: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.72);
+      --muted-2: rgba(255,255,255,.62);
+      --accent: #7c3aed;
+      --accent-2: #22d3ee;
+      --shadow: 0 18px 50px rgba(0,0,0,.45);
+      --radius-xl: 22px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body{
+      margin:0;
+      font-family: var(--sans);
+      background:
+        radial-gradient(1200px 800px at 30% -10%, rgba(124,58,237,.20), transparent 60%),
+        radial-gradient(1000px 680px at 90% 10%, rgba(34,211,238,.14), transparent 55%),
+        linear-gradient(180deg, #060913 0%, #050712 100%);
+      color: var(--text);
+    }
+
+    main{
+      min-height: 100vh;
+      display:flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 0; /* Changed to 0 to use all of the screen */
+    }
+
+    section[id]{
+      width: 100%;
+    }
+
+    .view-shell{
+      color: var(--text);
+      background:
+        radial-gradient(1000px 600px at 10% 0%, rgba(124,58,237,.35), transparent 60%),
+        radial-gradient(900px 520px at 90% 20%, rgba(34,211,238,.22), transparent 55%),
+        linear-gradient(180deg, #0b1220 0%, #070b14 100%);
+      border: none;
+      border-radius: 0; /* Remove border radius to make it full screen */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .view-inner{
+      padding: clamp(18px, 3.5vw, 34px);
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* Center content horizontally */
+    }
+
+    .topbar{
+      display:flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap:16px;
+      margin-bottom: 24px;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 8px 12px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing:.2px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 0 4px rgba(124,58,237,.16);
+    }
+
+    .title{
+      margin: 16px 0 8px 0;
+      font-size: clamp(24px, 3vw, 40px);
+      line-height: 1.15;
+      letter-spacing: -.02em;
+    }
+
+    .subtitle{
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+      max-width: 78ch;
+    }
+
+    .grid{
+      display: flex;
+      width: 100%;
+      justify-content: center;
+      flex-grow: 1;
+    }
+
+    .card{
+      width: 100%;
+      max-width: 1000px; /* Constrains reading width beautifully in the center */
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius-lg);
+      overflow:hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow);
+    }
+
+    .card-h{
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+    }
+
+    .card-h h2{
+      margin:0;
+      font-size: 14px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.86);
+    }
+
+    .card-b{
+      padding: 24px;
+      flex-grow: 1;
+      text-align: left; /* Keep markdown text aligned left for readability */
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      font-family: var(--mono);
+      font-size: 13px;
+      color: rgba(255,255,255,.88);
+      white-space: nowrap;
+    }
+
+    .pill i{
+      width:8px;height:8px;border-radius:999px; display:inline-block;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      opacity:.95;
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content: center; /* Centered Navigation */
+      gap: 16px;
+      padding: 20px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+      padding: 12px 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.90);
+      text-decoration:none;
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
+      user-select:none;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .btn:hover{
+      background: rgba(255,255,255,.07);
+      border-color: rgba(255,255,255,.18);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(0,0,0,.25);
+    }
+
+    .btn:focus-visible{
+      outline: 2px solid rgba(34,211,238,.55);
+      outline-offset: 3px;
+    }
+
+    .btn svg{ opacity:.9; }
+
+    .transition-opacity { transition: opacity 300ms ease; }
+    .duration-300 { transition-duration: 300ms; }
+    .opacity-100 { opacity: 1; }
+    .opacity-0 { opacity: 0; }
+    .hidden { display: none !important; }
+
+    /* Markdown content styles */
+    .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+      color: rgba(255,255,255,.96);
+      line-height: 1.2;
+      margin: 0 0 14px 0;
+    }
+    .markdown-body h2 { font-size: clamp(24px, 2.7vw, 36px); letter-spacing: -.02em; }
+    .markdown-body h3 { font-size: 20px; margin-top: 24px; }
+    .markdown-body p {
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 16px;
+      margin: 0 0 16px 0;
+    }
+    .markdown-body ul, .markdown-body ol {
+      margin: 0 0 16px 0;
+      padding-left: 24px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+    .markdown-body li {
+      margin: 8px 0;
+      line-height: 1.75;
+    }
+    .markdown-body strong {
+      color: rgba(255,255,255,.95);
+    }
+    .markdown-body code {
+      font-family: var(--mono);
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 8px;
+      padding: 2px 6px;
+      color: rgba(255,255,255,.94);
+      font-size: .95em;
+    }
+    .markdown-body hr {
+      border: 0;
+      height: 1px;
+      background: rgba(255,255,255,.12);
+      margin: 24px 0;
+    }
+    .markdown-body pre code{
+      background: transparent;
+      border: 0;
+      padding: 0;
+      color: rgba(255,255,255,.90);
+      font-size: 14px;
+    }
+    .markdown-body pre{
+      overflow:auto;
+      padding: 16px;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.25);
+      color: rgba(255,255,255,.90);
+      font-family: var(--mono);
+      line-height: 1.65;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .transition-opacity{ transition: none !important; }
+      .btn{ transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <textarea id="markdown-source" style="display:none;">
+    %%JSON_DATA_HERE%%
+  </textarea>
+
+  <main>
+    <section id="lesson-app">
+      <div class="view-shell">
+        <div class="view-inner">
+          <div class="topbar">
+            <div class="badge">
+              <span class="dot"></span>
+              <span>Lesson Module</span>
+            </div>
+            <h1 class="title">%%TITLE_HERE%%</h1>
+            <p class="subtitle">Navigate through the lesson pages to review each section in sequence.</p>
+          </div>
+
+          <div class="grid">
+            <!-- Removed the metadata sidebar entirely -->
+            
+            <div class="card">
+              <div class="card-h">
+                <h2>Main Lesson Content</h2>
+                <span class="pill"><i></i><span id="content-status">Visible section</span></span>
+              </div>
+              <div class="card-b">
+                <div id="sections-wrapper">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav">
+          <button type="button" class="btn" id="prevBtn" aria-label="Previous section">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Previous</span>
+          </button>
+          <button type="button" class="btn btn-primary" id="nextBtn" aria-label="Next section">
+            <span>Next</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  (function () {
+  // ==========================================
+  // 1. HELPER FUNCTIONS
+  // ==========================================
+
+  // Escapes HTML characters to prevent formatting issues and XSS attacks
+  function escapeHtml(s){
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // A lightweight, custom Markdown parser used as a fallback
+  // if the external 'marked.js' library fails to load from the CDN
+  function simpleMarkdownToHtml(md){
+    var lines = String(md || '').replace(/\r\n/g, '\n').split('\n');
+    var html = [];
+    var inCodeFence = false;
+    var codeLang = '';
+    var codeBuf = [];
+
+    function flushCode(){
+      if(!codeBuf.length) return;
+      var code = escapeHtml(codeBuf.join('\n'));
+      html.push('<pre><code' + (codeLang ? ' class="language-' + escapeHtml(codeLang) + '"' : '') + '>' + code + '</code></pre>');
+      codeBuf = [];
+      codeLang = '';
+    }
+
+    for(var i=0;i<lines.length;i++){
+      var line = lines[i];
+
+      // Handle code blocks (```)
+      var fenceMatch = line.match(/^\s*```(\w+)?\s*$/);
+      if(fenceMatch){
+        if(!inCodeFence){
+          inCodeFence = true;
+          codeLang = fenceMatch[1] || '';
+          codeBuf = [];
+        } else {
+          inCodeFence = false;
+          flushCode();
+        }
+        continue;
+      }
+
+      if(inCodeFence){
+        codeBuf.push(line);
+        continue;
+      }
+
+      // Handle horizontal rules (---)
+      if(/^\s*---\s*$/.test(line)){
+        html.push('<hr/>');
+        continue;
+      }
+
+      // Handle Headings (#, ##, ###, etc.)
+      var headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+      if(headingMatch){
+        var level = headingMatch[1].length;
+        var text = headingMatch[2].trim();
+        html.push('<h' + level + '>' + renderInline(text) + '</h' + level + '>');
+        continue;
+      }
+
+      // Handle Bullet Lists (-)
+      var ulMatch = line.match(/^\s*-\s+(.*)$/);
+      if(ulMatch){
+        var items = [];
+        while(i < lines.length && (m = lines[i].match(/^\s*-\s+(.*)$/))){
+          items.push('<li>' + renderInline(m[1].trim()) + '</li>');
+          i++;
+        }
+        i--;
+        html.push('<ul>' + items.join('') + '</ul>');
+        continue;
+      }
+
+      // Ignore empty lines
+      if(line.trim() === ''){
+        continue;
+      }
+
+      // Default to standard paragraphs
+      html.push('<p>' + renderInline(line.trim()) + '</p>');
+    }
+
+    flushCode();
+    return html.join('');
+
+    // Renders inline styles like **bold** and `code`
+    function renderInline(text){
+      var out = escapeHtml(text);
+      out = out.replace(/`([^`]+)`/g, function(_, code){ return '<code>' + code + '</code>'; });
+      out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      return out;
+    }
+  }
+
+
+  // ==========================================
+  // 2. DATA EXTRACTION & DYNAMIC PAGE CREATION
+  // ==========================================
+
+  // Extract the raw JSON string from the hidden textarea
+  var rawEl = document.getElementById('markdown-source');
+  var raw = rawEl ? rawEl.value : '[]';
+
+  // Parse the JSON string into a usable JavaScript array of objects
+  var lessonParts;
+  try{
+    lessonParts = JSON.parse(raw);
+  }catch(e){
+    lessonParts = []; // Failsafe if JSON is invalid
+  }
+  if(!Array.isArray(lessonParts)) lessonParts = [];
+
+  // Find the wrapper where our pages should go, and clear any hardcoded HTML
+  var wrapper = document.getElementById('sections-wrapper');
+  if (wrapper) wrapper.innerHTML = ''; 
+
+  // Loop through the JSON array and dynamically create an HTML <article> for each item
+  lessonParts.forEach(function(part) {
+    var article = document.createElement('article');
+    article.id = part.id;
+    // Set classes so the page is styled properly and starts out hidden/transparent
+    article.className = 'lesson-section transition-opacity duration-300 opacity-0 hidden';
+    
+    // Create the inner div that will hold the final parsed text
+    var innerDiv = document.createElement('div');
+    innerDiv.className = 'markdown-body';
+    innerDiv.setAttribute('data-content-target', part.id);
+    
+    // Assemble the page and append it to the main wrapper
+    article.appendChild(innerDiv);
+    if (wrapper) wrapper.appendChild(article);
+  });
+
+
+  // ==========================================
+  // 3. MARKDOWN PARSING & INJECTION
+  // ==========================================
+
+  // Check if the robust 'marked' library successfully loaded from the CDN
+  var hasMarked = typeof window.marked !== 'undefined' && window.marked && typeof window.marked.parse === 'function';
+  if(hasMarked){
+    try{
+      window.marked.setOptions({ breaks: false, gfm: true });
+    }catch(e){}
+  }
+
+  // Inject the text into the dynamically created pages
+  lessonParts.forEach(function (part) {
+    // Find the specific div we created for this part
+    var target = document.querySelector('[data-content-target="' + part.id + '"]');
+    if (target) {
+      var content = part.content || '';
+      // Use 'marked' if available, otherwise fall back to our simple parser
+      target.innerHTML = hasMarked ? window.marked.parse(content) : simpleMarkdownToHtml(content);
+    }
+  });
+
+
+  // ==========================================
+  // 4. NAVIGATION STATE & LOGIC
+  // ==========================================
+
+  // Create an array referencing all our dynamically created DOM elements
+  var sections = lessonParts
+    .map(function(part){ return document.getElementById(part.id); })
+    .filter(Boolean);
+
+  var currentIndex = 0; // Tracks which page the user is currently on
+
+  // Grab the UI elements used for navigation and status updates
+  var contentStatus = document.getElementById('content-status');
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+
+  // Updates the "Section X / Y" text and enables/disables the navigation buttons
+  function updateMeta(index) {
+    // Update the indicator pill
+    if(contentStatus) contentStatus.textContent = 'Section ' + (index + 1) + ' / ' + lessonParts.length;
+
+    // Determine if we are at the very beginning or the very end
+    var atFirst = index === 0;
+    var atLast = index === lessonParts.length - 1;
+
+    // Update the Previous button (disable/fade if at the start)
+    if(prevBtn){
+      prevBtn.disabled = atFirst;
+      prevBtn.style.opacity = atFirst ? '.45' : '1';
+      prevBtn.style.pointerEvents = atFirst ? 'none' : 'auto';
+    }
+    // Update the Next button (disable/fade if at the end)
+    if(nextBtn){
+      nextBtn.disabled = atLast;
+      nextBtn.style.opacity = atLast ? '.45' : '1';
+      nextBtn.style.pointerEvents = atLast ? 'none' : 'auto';
+    }
+  }
+
+  // Instantly shows a specific section (used mainly on initial page load)
+  function showSection(index) {
+    if(!sections.length) return;
+    sections.forEach(function (section, i) {
+      if (i === index) {
+        section.classList.remove('hidden');
+        // requestAnimationFrame ensures the browser paints the display block before fading in
+        requestAnimationFrame(function () {
+          section.classList.remove('opacity-0');
+          section.classList.add('opacity-100');
+        });
+      } else {
+        section.classList.add('opacity-0');
+        section.classList.remove('opacity-100');
+        section.classList.add('hidden');
+      }
+    });
+    currentIndex = index;
+    updateMeta(index);
+  }
+
+  // Smoothly fades out the current section and fades in the target section
+  function transitionTo(index) {
+    if(!sections.length) return;
+    // Failsafe: Stop if trying to go out of bounds or to the same page
+    if (index < 0 || index >= sections.length || index === currentIndex) return;
+
+    var current = sections[currentIndex];
+    if(!current) return;
+
+    // Fade out current section
+    current.classList.add('opacity-0');
+    current.classList.remove('opacity-100');
+
+    // Wait 300ms for the CSS fade transition to finish
+    window.setTimeout(function () {
+      current.classList.add('hidden'); // Remove from layout
+      
+      var next = sections[index];
+      if(!next) return;
+
+      next.classList.remove('hidden'); // Add to layout
+      // Ensure browser registers the display change, then fade in
+      requestAnimationFrame(function () {
+        next.classList.remove('opacity-0');
+        next.classList.add('opacity-100');
+      });
+
+      // Update state to the new page
+      currentIndex = index;
+      updateMeta(index);
+    }, 300);
+  }
+
+
+  // ==========================================
+  // 5. EVENT LISTENERS & INITIALIZATION
+  // ==========================================
+
+  // Attach click listeners to the UI buttons
+  if(prevBtn) prevBtn.addEventListener('click', function () { transitionTo(currentIndex - 1); });
+  if(nextBtn) nextBtn.addEventListener('click', function () { transitionTo(currentIndex + 1); });
+
+  // Attach keyboard listeners so users can navigate with Arrow keys
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'ArrowLeft') transitionTo(currentIndex - 1);
+    if (event.key === 'ArrowRight') transitionTo(currentIndex + 1);
+  });
+
+  // Initialize the app by showing the first page
+  if(sections.length) {
+    showSection(0);
+  } else {
+    updateMeta(0); // Failsafe if there are 0 pages
+  }
+
+})();
+  </script>
+</body>
+</html>

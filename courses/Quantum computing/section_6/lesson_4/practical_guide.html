@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson Module - Agent Task Suites and Evaluation Rubrics</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked-katex-extension/lib/index.umd.js"></script>
+
+  <script>
+    // Minimal Tailwind shim (used only if CDN fails). This keeps the page functional without external deps.
+    (function(){
+      var ok = true;
+      try{
+        if(!window.tailwind) ok = false;
+      }catch(e){ ok = false; }
+    })();
+  </script>
+  <style>
+    /* ========================================
+      PREMIUM THEME & TYPOGRAPHY VARIABLES
+      ========================================
+    */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root{
+      --bg-base: #05050a;
+      --bg-surface: rgba(17, 18, 28, 0.65);
+      --bg-surface-hover: rgba(255, 255, 255, 0.05);
+      
+      --stroke-soft: rgba(255, 255, 255, 0.08);
+      --stroke-strong: rgba(255, 255, 255, 0.15);
+      
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-heading: #ffffff;
+      
+      --accent-primary: #8b5cf6;
+      --accent-secondary: #3b82f6;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      
+      --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --shadow-glow: 0 0 40px rgba(139, 92, 246, 0.15);
+      
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      
+      --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      
+      /* New Wider Content Width */
+      --content-max-width: 1200px; 
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      /* Dynamic ambient background */
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.08), transparent 40%),
+        radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.08), transparent 40%);
+      background-attachment: fixed;
+    }
+
+    /* ========================================
+      LAYOUT & SHELL
+      ========================================
+    */
+    main {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .view-shell {
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    
+    .view-inner {
+      padding: clamp(20px, 4vw, 48px) 24px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ========================================
+      TOP HEADER & TYPOGRAPHY
+      ========================================
+    */
+    .topbar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+      margin-bottom: 40px;
+      width: 100%;
+      max-width: var(--content-max-width);
+      animation: fadeDown 0.6s ease-out;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border: 1px solid var(--stroke-strong);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 999px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent-gradient);
+      box-shadow: 0 0 8px var(--accent-primary);
+    }
+
+    .title {
+      margin: 8px 0 0 0;
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--text-heading);
+      background: linear-gradient(to right, #ffffff, #a5b4fc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: clamp(16px, 1.5vw, 18px);
+      line-height: 1.6;
+      max-width: 60ch;
+    }
+
+    /* ========================================
+      MAIN CARD (WIDER VIEWPORT)
+      ========================================
+    */
+    .grid {
+      display: flex;
+      width: 100%;
+      justify-content: center;
+      flex-grow: 1;
+    }
+
+    .card {
+      width: 100%;
+      max-width: var(--content-max-width);
+      border: 1px solid var(--stroke-soft);
+      background: var(--bg-surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-soft), var(--shadow-glow);
+    }
+
+    .card-h {
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--stroke-soft);
+      background: rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-h h2 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .card-b {
+      padding: clamp(24px, 5vw, 56px);
+      flex-grow: 1;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #c4b5fd;
+    }
+
+    /* ========================================
+      NAVIGATION BOTTOM BAR
+      ========================================
+    */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 24px;
+      border-top: 1px solid var(--stroke-soft);
+      background: rgba(5, 5, 10, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 14px 28px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke-strong);
+      background: var(--bg-surface);
+      color: var(--text-heading);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--bg-surface-hover);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      border: none;
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #9f7aea, #60a5fa);
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ========================================
+      ENHANCED MARKDOWN TYPOGRAPHY
+      ========================================
+    */
+    .markdown-body {
+      max-width: 100%;
+      margin: 0 auto;
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--text-main);
+    }
+
+    .markdown-body h1, 
+    .markdown-body h2, 
+    .markdown-body h3 {
+      color: var(--text-heading);
+      font-weight: 600;
+      margin-top: 2em;
+      margin-bottom: 0.75em;
+      line-height: 1.3;
+    }
+
+    .markdown-body h1 { 
+      font-size: 2.25em; 
+      letter-spacing: -0.02em;
+    }
+    
+    .markdown-body h2 { 
+      font-size: 1.75em; 
+      letter-spacing: -0.01em;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid var(--stroke-soft);
+    }
+    
+    .markdown-body h3 { 
+      font-size: 1.35em; 
+      color: #e2e8f0;
+    }
+
+    /* Eliminate top margin for the very first element to align with padding */
+    .markdown-body > *:first-child { margin-top: 0; }
+
+    .markdown-body p {
+      margin-top: 0;
+      margin-bottom: 1.25em;
+    }
+
+    .markdown-body ul, 
+    .markdown-body ol {
+      margin-top: 0;
+      margin-bottom: 1.5em;
+      padding-left: 1.5em;
+    }
+
+    .markdown-body li {
+      margin-bottom: 0.5em;
+    }
+
+    .markdown-body li > ul, 
+    .markdown-body li > ol {
+      margin-top: 0.5em;
+    }
+
+    .markdown-body strong {
+      color: var(--text-heading);
+      font-weight: 600;
+    }
+
+    .markdown-body a {
+      color: var(--accent-secondary);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    .markdown-body a:hover {
+      border-bottom-color: var(--accent-secondary);
+    }
+
+    .markdown-body code {
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.2em 0.4em;
+      border-radius: 6px;
+      font-size: 0.9em;
+      color: #93c5fd; /* Light blue tint for inline code */
+    }
+
+    .markdown-body pre {
+      background: #0d1117;
+      border: 1px solid var(--stroke-soft);
+      border-radius: var(--radius-md);
+      padding: 1.25em;
+      overflow-x: auto;
+      margin-bottom: 1.5em;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .markdown-body pre code {
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      color: #e2e8f0;
+      font-size: 0.9em;
+      line-height: 1.6;
+    }
+
+    .markdown-body blockquote {
+      margin: 0 0 1.5em 0;
+      padding: 0.5em 0 0.5em 1.5em;
+      border-left: 4px solid var(--accent-primary);
+      color: var(--text-muted);
+      background: linear-gradient(to right, rgba(139, 92, 246, 0.05), transparent);
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+
+    .markdown-body blockquote p:last-child {
+      margin-bottom: 0;
+    }
+
+    .markdown-body hr {
+      border: none;
+      height: 1px;
+      background: var(--stroke-strong);
+      margin: 3em 0;
+    }
+
+    /* ========================================
+      TASK CARD STYLES (STRUCTURED CARDS)
+      ========================================
+    */
+    .task-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .task-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--stroke-soft);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .task-card:hover {
+      border-color: var(--stroke-strong);
+      transform: translateY(-2px);
+    }
+    .task-card h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.25em;
+      color: var(--accent-secondary);
+    }
+    .objective-card {
+      border-left: 4px solid var(--accent-primary);
+    }
+    .instructions-list {
+      padding-left: 20px;
+    }
+    .instructions-list li {
+      margin-bottom: 12px;
+    }
+    .criteria-checklist {
+      list-style: none;
+      padding-left: 0;
+    }
+    .criteria-checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .criteria-checklist li::before {
+      content: "✓";
+      color: #10b981;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* KaTeX overrides for dark mode */
+    .katex {
+      color: var(--text-heading);
+      font-size: 1.1em;
+    }
+
+    /* ========================================
+      TRANSITIONS & ANIMATIONS
+      ========================================
+    */
+    .transition-opacity { transition: opacity 400ms ease, transform 400ms ease; }
+    .opacity-100 { opacity: 1; transform: translateY(0); }
+    .opacity-0 { opacity: 0; transform: translateY(10px); }
+    .hidden { display: none !important; }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .transition-opacity { transition: none !important; }
+      .btn { transition: none !important; }
+      .topbar { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <textarea id="markdown-source" style="display:none;">
+    [
+  {
+    "id": "guide_page_1",
+    "content": "# Page 1 \u2014 Objective and Prerequisites\n\n## Objective\nImplement a small **QAOA workflow** that:\n1. Encodes a combinatorial optimization problem into a **cost Hamiltonian**.\n2. Builds a **parameterized alternating circuit** with cost and mixer layers.\n3. Runs a **classical optimization loop** to tune the QAOA parameters.\n4. Tests one or more **QAOA extensions** such as warm-starting or constraint-preserving mixers.\n\nUse this when you want to solve problems like **Max-Cut**, simple scheduling constraints, routing subproblems, or binary decision problems on NISQ-style hardware or simulators.\n\n## Prerequisites\nUse these concrete tools before starting:\n- **Python 3.10+**\n- A quantum SDK such as **Qiskit 1.x** or **PennyLane 0.4x**\n- A simulator backend such as **Qiskit Aer** or **PennyLane default.qubit**\n- A classical optimizer package such as **SciPy** or the optimizer modules bundled with your SDK\n- Access to either:\n  - a **local quantum simulator**, or\n  - a cloud quantum service such as **IBM Quantum** if you want to test hardware execution\n- For graph-based examples, install **NetworkX**\n\n## What to prepare\n- A **small problem instance** first, ideally 4\u20138 variables\n- A **baseline classical solution** if you want to try warm-start QAOA\n- A way to **estimate expectation values from shots**, because QAOA is measurement-driven\n\n## Suggested project structure\n- `problem.py` \u2014 define the objective and constraints\n- `qaoa_circuit.py` \u2014 build cost and mixer layers\n- `optimize.py` \u2014 run the classical parameter search\n- `evaluate.py` \u2014 measure bitstring frequencies and compute performance\n- `extensions.py` \u2014 add warm-start, custom mixers, or adaptive variants"
+  },
+  {
+    "id": "guide_page_2",
+    "content": "# Page 2 \u2014 Build the Core QAOA Circuit\n\n## Step 1: Define the optimization problem as a binary objective\n**Action:** Write the objective as a function over bitstrings.\n\n**Why:** QAOA operates on binary computational basis states, so you need a direct mapping from candidate solutions to scores.\n\n**How (Example):**\nFor Max-Cut on a graph, define the cost of a bitstring `z` as the number of edges crossing the partition.\n```python\nimport networkx as nx\n\ndef maxcut_cost(bitstring, graph):\n    cut = 0\n    for u, v in graph.edges():\n        if bitstring[u] != bitstring[v]:\n            cut += 1\n    return cut\n```\n\n## Step 2: Convert the objective into a cost Hamiltonian\n**Action:** Build the operator whose eigenvalues match your objective values.\n\n**Why:** The cost Hamiltonian is what lets the quantum circuit assign phases based on solution quality.\n\n**How (Example):**\nFor Max-Cut, each edge contributes a Pauli-Z interaction term. In Qiskit, you can represent this as a `SparsePauliOp` or use a built-in problem class if available.\n```python\nfrom qiskit.quantum_info import SparsePauliOp\n\n# Example for a 2-qubit edge term: 0.5 * (I - Z_i Z_j)\nterms = [\n    (\"II\", 0.5),\n    (\"ZZ\", -0.5)\n]\ncost_op = SparsePauliOp.from_list(terms)\n```\n\n## Step 3: Initialize the standard QAOA starting state\n**Action:** Prepare a uniform superposition across all bitstrings.\n\n**Why:** This gives the algorithm a neutral starting point from which the mixer can explore the full search space.\n\n**How (Example):**\nApply Hadamard gates to every qubit.\n```python\nfrom qiskit import QuantumCircuit\n\nqc = QuantumCircuit(2)\nqc.h([0, 1])\n```\n\n## Step 4: Add one cost layer and one mixer layer\n**Action:** Alternate the cost unitary and mixer unitary using parameters `gamma` and `beta`.\n\n**Why:** This alternating structure is the defining mechanism of QAOA.\n\n**How (Example):**\n- Cost layer: implement `exp(-i * gamma * H_cost)`\n- Mixer layer: implement `exp(-i * beta * sum(X_i))`\n```python\n# Conceptual pattern\nfor qubit in range(n):\n    qc.rz(2 * gamma * coeff, qubit)\n# mixer\nfor qubit in range(n):\n    qc.rx(2 * beta, qubit)\n```\n\n## Step 5: Generalize to p layers\n**Action:** Repeat the cost-and-mixer pair `p` times.\n\n**Why:** Increasing depth boosts expressibility, but also increases noise and optimization difficulty.\n\n**How (Example):**\nStore parameters as arrays:\n```python\ngammas = [0.4, 0.7]\nbetas = [0.2, 0.5]\n```\nand apply them layer by layer in a loop.\n\n## Step 6: Measure the bitstrings and compute the expected cost\n**Action:** Run the circuit with many shots and estimate the average objective value.\n\n**Why:** QAOA is evaluated from measurement outcomes, not from a closed-form exact answer on hardware.\n\n**How (Example):**\n1. Sample the circuit 1,000\u201310,000 times.\n2. Count bitstring frequencies.\n3. Compute the weighted average cost.\n```python\nexpected_cost = sum(maxcut_cost(bs, graph) * p for bs, p in distribution.items())\n```"
+  },
+  {
+    "id": "guide_page_3",
+    "content": "# Page 3 \u2014 Optimize Parameters and Add Practical Extensions\n\n## Step 1: Wrap the circuit in a classical optimization loop\n**Action:** Create an objective function that returns the measured expectation value for given parameters.\n\n**Why:** The classical optimizer needs a scalar value to search for better `gamma` and `beta` settings.\n\n**How (Example):**\n```python\ndef objective(params):\n    gammas = params[:p]\n    betas = params[p:]\n    return estimate_energy(gammas, betas)\n```\nThen call a derivative-free optimizer:\n```python\nfrom scipy.optimize import minimize\nresult = minimize(objective, x0=initial_params, method=\"COBYLA\")\n```\n\n## Step 2: Choose an optimizer suited to shot noise\n**Action:** Prefer noisy-robust optimizers such as COBYLA or SPSA.\n\n**Why:** QAOA measurements fluctuate because they are based on finite shots, so exact-gradient methods can be unstable or expensive.\n\n**How (Example):**\n- Use **COBYLA** for a lightweight baseline.\n- Use **SPSA** if evaluation noise is high or hardware access is costly.\n\n## Step 3: Benchmark against a classical baseline\n**Action:** Compare the best QAOA solution with a classical heuristic or exact solver on small instances.\n\n**Why:** You need a reference point to know whether the quantum routine is actually improving solution quality.\n\n**How (Example):**\nFor small Max-Cut graphs, compare against brute force or a greedy cut heuristic.\n```python\n# Pseudocode\nqaoa_best = run_qaoa(graph)\nclassical_best = brute_force_maxcut(graph)\nprint(qaoa_best, classical_best)\n```\n\n## Step 4: Try warm-start QAOA\n**Action:** Initialize from a classical approximate solution instead of the uniform superposition.\n\n**Why:** If a good approximate solution already exists, warm-starting can reduce search effort and improve convergence.\n\n**How (Example):**\n- Solve a relaxed classical version first.\n- Convert that result into biased initial qubit amplitudes or custom initial state preparation.\n- Run QAOA from that state rather than `|+...+>`.\n\n## Step 5: Use constraint-preserving mixers when feasibility matters\n**Action:** Replace the standard X mixer with a mixer that only moves within valid states.\n\n**Why:** Some optimization problems have hard constraints, and a standard mixer can generate invalid solutions.\n\n**How (Example):**\nFor a scheduling or assignment problem, design a mixer that preserves one-hot encoding by swapping amplitudes only between valid basis states.\n\n## Step 6: Experiment with adaptive or layerwise strategies\n**Action:** Start with small depth and grow the circuit gradually.\n\n**Why:** This reduces the risk of overfitting, barren optimization landscapes, and unnecessary hardware noise.\n\n**How (Example):**\n- Begin with `p = 1`\n- Optimize parameters\n- Increase to `p = 2`\n- Reuse the previous solution as the initial guess\n\n## Step 7: Transfer parameters across problem sizes\n**Action:** Reuse learned parameters from smaller instances to initialize larger ones.\n\n**Why:** This can accelerate training and improve stability when scaling up.\n\n**How (Example):**\nIf a 6-node graph produces good `gammas` and `betas`, use those values as the starting point for an 8-node graph with the same graph family."
+  },
+  {
+    "id": "guide_page_4",
+    "content": "# Page 4 \u2014 Validate, Tune, and Deploy on NISQ Hardware\n\n## Step 1: Validate circuit behavior on a simulator first\n**Action:** Test the QAOA workflow on an exact or shot-based simulator before running hardware.\n\n**Why:** Simulation helps isolate encoding bugs, circuit errors, and parameter issues.\n\n**How (Example):**\nRun three checks:\n1. Does the circuit compile?\n2. Do the measured bitstrings satisfy constraints?\n3. Does the objective improve after optimization?\n\n## Step 2: Tune depth, shots, and repetition count\n**Action:** Adjust `p`, shot count, and optimization restarts.\n\n**Why:** These settings control the tradeoff between expressibility, noise, and runtime.\n\n**How (Example):**\n- Start with `p = 1` or `p = 2`\n- Use 1,000 shots for development\n- Increase to 5,000+ shots for more stable expectation estimates\n- Run 3\u201310 random restarts to reduce local-minimum risk\n\n## Step 3: Move to hardware with noise-aware settings\n**Action:** Transpile the circuit for the target backend and minimize depth and two-qubit gates.\n\n**Why:** NISQ devices are sensitive to circuit depth, gate errors, and connectivity constraints.\n\n**How (Example):**\n- Use the backend\u2019s native gate set\n- Optimize qubit placement\n- Keep the mixer and cost operators as shallow as possible\n\n## Step 4: Track performance metrics\n**Action:** Record the best objective value, feasibility rate, circuit depth, and number of shots used.\n\n**Why:** QAOA success is not just about the final score; it is also about how efficiently that score was obtained.\n\n**How (Example):**\nMaintain a simple results table:\n- `best_energy`\n- `approximation_ratio`\n- `feasible_fraction`\n- `p`\n- `shots`\n- `optimizer`\n\n## Final implementation checklist\n- [ ] Problem encoded as a binary objective\n- [ ] Cost Hamiltonian built correctly\n- [ ] Mixer chosen appropriately for the constraints\n- [ ] Classical optimizer handles shot noise\n- [ ] Baseline comparison completed\n- [ ] Warm-start or other extension tested\n- [ ] Simulator results validated before hardware execution\n\n## Practical takeaway\nIf your circuit alternates **cost phases** and **mixer exploration**, and you keep the circuit shallow enough for noisy hardware, you have a workable QAOA implementation. From there, extensions like **warm-starting**, **constraint-preserving mixers**, and **adaptive depth selection** are the main levers for better real-world performance."
+  }
+]
+  </textarea>
+
+  <main>
+    <section id="lesson-app" style="width: 100%;">
+      <div class="view-shell">
+        <div class="view-inner">
+          <div class="topbar">
+            <div class="badge">
+              <span class="dot"></span>
+              <span>Practical Guide</span>
+            </div>
+            <h1 class="title">Practical Guide</h1>
+            <p class="subtitle">A step-by-step walkthrough of the implementation.</p>
+          </div>
+
+          <div class="grid">
+            <div class="card">
+              <div class="card-b">
+                <div id="sections-wrapper">
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav">
+          <button type="button" class="btn" id="prevBtn" aria-label="Previous section">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Previous</span>
+          </button>
+          <button type="button" class="btn btn-primary" id="nextBtn" aria-label="Next section">
+            <span>Continue to Next</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  (function () {
+  // ==========================================
+  // 1. HELPER FUNCTIONS
+  // ==========================================
+
+  function escapeHtml(s){
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function simpleMarkdownToHtml(md){
+    var lines = String(md || '').replace(/\r\n/g, '\n').split('\n');
+    var html = [];
+    var inCodeFence = false;
+    var codeLang = '';
+    var codeBuf = [];
+
+    function flushCode(){
+      if(!codeBuf.length) return;
+      var code = escapeHtml(codeBuf.join('\n'));
+      html.push('<pre><code' + (codeLang ? ' class="language-' + escapeHtml(codeLang) + '"' : '') + '>' + code + '</code></pre>');
+      codeBuf = [];
+      codeLang = '';
+    }
+
+    for(var i=0;i<lines.length;i++){
+      var line = lines[i];
+
+      var fenceMatch = line.match(/^\s*```(\w+)?\s*$/);
+      if(fenceMatch){
+        if(!inCodeFence){
+          inCodeFence = true;
+          codeLang = fenceMatch[1] || '';
+          codeBuf = [];
+        } else {
+          inCodeFence = false;
+          flushCode();
+        }
+        continue;
+      }
+
+      if(inCodeFence){
+        codeBuf.push(line);
+        continue;
+      }
+
+      if(/^\s*---\s*$/.test(line)){
+        html.push('<hr/>');
+        continue;
+      }
+
+      var headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+      if(headingMatch){
+        var level = headingMatch[1].length;
+        var text = headingMatch[2].trim();
+        html.push('<h' + level + '>' + renderInline(text) + '</h' + level + '>');
+        continue;
+      }
+
+      var ulMatch = line.match(/^\s*-\s+(.*)$/);
+      if(ulMatch){
+        var items = [];
+        while(i < lines.length && (m = lines[i].match(/^\s*-\s+(.*)$/))){
+          items.push('<li>' + renderInline(m[1].trim()) + '</li>');
+          i++;
+        }
+        i--;
+        html.push('<ul>' + items.join('') + '</ul>');
+        continue;
+      }
+
+      if(line.trim() === ''){
+        continue;
+      }
+
+      html.push('<p>' + renderInline(line.trim()) + '</p>');
+    }
+
+    flushCode();
+    return html.join('');
+
+    function renderInline(text){
+      var out = escapeHtml(text);
+      out = out.replace(/`([^`]+)`/g, function(_, code){ return '<code>' + code + '</code>'; });
+      out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      return out;
+    }
+  }
+
+  // ==========================================
+  // 2. DATA EXTRACTION & DYNAMIC PAGE CREATION
+  // ==========================================
+
+  var rawEl = document.getElementById('markdown-source');
+  var raw = rawEl ? rawEl.value : '[]';
+
+  var lessonParts;
+  try {
+    var parsedData = JSON.parse(raw.trim());
+    // UPDATED LOGIC: Handle both a direct array or the `{ parts: [...] }` object structure
+    lessonParts = Array.isArray(parsedData) ? parsedData : (parsedData.parts || []);
+  } catch(e) {
+    lessonParts = []; 
+  }
+  if(!Array.isArray(lessonParts)) lessonParts = [];
+
+  var wrapper = document.getElementById('sections-wrapper');
+  if (wrapper) wrapper.innerHTML = ''; 
+
+  lessonParts.forEach(function(part) {
+    var article = document.createElement('article');
+    article.id = part.id;
+    article.className = 'lesson-section transition-opacity duration-300 opacity-0 hidden';
+    
+    var innerDiv = document.createElement('div');
+    innerDiv.className = 'markdown-body';
+    innerDiv.setAttribute('data-content-target', part.id);
+    
+    article.appendChild(innerDiv);
+    if (wrapper) wrapper.appendChild(article);
+  });
+
+  // ==========================================
+  // 3. MARKDOWN PARSING & INJECTION
+  // ==========================================
+
+  var hasMarked = typeof window.marked !== 'undefined' && window.marked && typeof window.marked.parse === 'function';
+  
+  if(hasMarked){
+    try{
+      // Attach the KaTeX extension so formulas render properly
+      if (typeof window.markedKatex !== 'undefined') {
+        window.marked.use(window.markedKatex({
+          throwOnError: false,
+          output: 'html'
+        }));
+      }
+      window.marked.setOptions({ breaks: false, gfm: true });
+    }catch(e){}
+  }
+
+  lessonParts.forEach(function (part) {
+    var target = document.querySelector('[data-content-target="' + part.id + '"]');
+    if (target) {
+      var content = (part.content || '').trim();
+      // If the content starts with an HTML tag, inject it directly to bypass Markdown escaping
+      if (content.startsWith('<')) {
+        target.innerHTML = content;
+      } else {
+        target.innerHTML = hasMarked ? window.marked.parse(content) : simpleMarkdownToHtml(content);
+      }
+    }
+  });
+
+  // ==========================================
+  // 4. NAVIGATION STATE & LOGIC
+  // ==========================================
+
+  var sections = lessonParts
+    .map(function(part){ return document.getElementById(part.id); })
+    .filter(Boolean);
+
+  var currentIndex = 0; 
+
+  var contentStatus = document.getElementById('content-status');
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+
+  function updateMeta(index) {
+    if(contentStatus) contentStatus.textContent = 'Section ' + (index + 1) + ' of ' + lessonParts.length;
+
+    var atFirst = index === 0;
+    var atLast = index === lessonParts.length - 1;
+
+    if(prevBtn){
+      prevBtn.disabled = atFirst;
+    }
+    if(nextBtn){
+      nextBtn.disabled = atLast;
+    }
+    
+    var cardElement = document.querySelector('.card');
+    if(cardElement && window.scrollY > cardElement.offsetTop) {
+        window.scrollTo({ top: cardElement.offsetTop - 20, behavior: 'smooth' });
+    }
+  }
+
+  function showSection(index) {
+    if(!sections.length) return;
+    sections.forEach(function (section, i) {
+      if (i === index) {
+        section.classList.remove('hidden');
+        requestAnimationFrame(function () {
+          section.classList.remove('opacity-0');
+          section.classList.add('opacity-100');
+        });
+      } else {
+        section.classList.add('opacity-0');
+        section.classList.remove('opacity-100');
+        section.classList.add('hidden');
+      }
+    });
+    currentIndex = index;
+    updateMeta(index);
+  }
+
+  function transitionTo(index) {
+    if(!sections.length) return;
+    if (index < 0 || index >= sections.length || index === currentIndex) return;
+
+    var current = sections[currentIndex];
+    if(!current) return;
+
+    current.classList.add('opacity-0');
+    current.classList.remove('opacity-100');
+
+    window.setTimeout(function () {
+      current.classList.add('hidden'); 
+      
+      var next = sections[index];
+      if(!next) return;
+
+      next.classList.remove('hidden'); 
+      requestAnimationFrame(function () {
+        next.classList.remove('opacity-0');
+        next.classList.add('opacity-100');
+      });
+
+      currentIndex = index;
+      updateMeta(index);
+    }, 400);
+  }
+
+  // ==========================================
+  // 5. EVENT LISTENERS & INITIALIZATION
+  // ==========================================
+
+  if(prevBtn) prevBtn.addEventListener('click', function () { transitionTo(currentIndex - 1); });
+  if(nextBtn) nextBtn.addEventListener('click', function () { transitionTo(currentIndex + 1); });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'ArrowLeft') transitionTo(currentIndex - 1);
+    if (event.key === 'ArrowRight') transitionTo(currentIndex + 1);
+  });
+
+  if(sections.length) {
+    showSection(0);
+  } else {
+    updateMeta(0); 
+  }
+
+})();
+  </script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ai_Agents Curriculum</title>
+    <style>
+:root {
+    --bg: #0b1220;
+    --panel: rgba(255,255,255,.06);
+    --panel-2: rgba(255,255,255,.08);
+    --stroke: rgba(255,255,255,.12);
+    --text: rgba(255,255,255,.92);
+    --muted: rgba(255,255,255,.72);
+    --accent: #7c3aed;
+    --accent-2: #22d3ee;
+    --shadow: 0 18px 50px rgba(0,0,0,.45);
+    --radius-xl: 22px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --sans: ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+body {
+    margin: 0;
+    font-family: var(--sans);
+    background: radial-gradient(1200px 800px at 30% -10%, rgba(124,58,237,.15), transparent 60%),
+                radial-gradient(1000px 680px at 90% 10%, rgba(34,211,238,.1), transparent 55%),
+                linear-gradient(180deg, #060913 0%, #050712 100%);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+h1 { font-size: 2.5rem; letter-spacing: -0.02em; margin-bottom: 1rem; }
+p.subtitle { color: var(--muted); margin-bottom: 3rem; font-size: 1.1rem; }
+
+/* Grid for Dashboard */
+.course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.course-card {
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.course-card:hover {
+    background: var(--panel-2);
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+}
+
+.course-card h3 { margin: 0 0 12px 0; font-size: 1.4rem; }
+.course-card .meta { font-size: 0.9rem; color: var(--muted); }
+
+/* Curriculum View */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    color: var(--accent-2);
+    text-decoration: none;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.section-container {
+    margin-bottom: 16px;
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.section-header {
+    padding: 16px 20px;
+    background: rgba(255,255,255,.03);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+}
+
+.lesson-list { padding: 10px 20px; }
+.lesson-item {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--stroke);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.lesson-item:last-child { border-bottom: none; }
+
+.lesson-title { font-weight: 500; }
+
+.btn-group { display: flex; gap: 8px; }
+.btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.8; }
+.btn-theory { background: var(--accent); color: white; }
+.btn-guide { background: #10b981; color: white; }
+.btn-task { background: #f59e0b; color: white; }
+.btn-test { background: #ef4444; color: white; }
+
+/* Simple Accordion Logic (can be enhanced with JS) */
+.section-content { display: block; } /* Changed from none for simplicity in static version */
+</style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Dashboard</a>
+        <h1>Ai Agents</h1>
+        <div class="curriculum-container">
+            
+            <div class="section-container">
+                <div class="section-header">
+                    <span>Open Ai Sgents Sdk</span>
+                </div>
+                <div class="section-content">
+                    <div class="lesson-list">
+                        
+            <div class="lesson-item">
+                <span class="lesson-title">Basic Usage</span>
+                <div class="btn-group">
+                    <a href="courses/ai_agents/Open AI sgents sdk/basic usage/lesson.html" class="btn btn-theory">Theory</a><a href="courses/ai_agents/Open AI sgents sdk/basic usage/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/ai_agents/Open AI sgents sdk/basic usage/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+            <div class="lesson-item">
+                <span class="lesson-title">Using Tools</span>
+                <div class="btn-group">
+                    <a href="courses/ai_agents/Open AI sgents sdk/using tools/lesson.html" class="btn btn-theory">Theory</a><a href="courses/ai_agents/Open AI sgents sdk/using tools/practical_guide.html" class="btn btn-guide">Guide</a><a href="courses/ai_agents/Open AI sgents sdk/using tools/practical_task.html" class="btn btn-task">Task</a>
+                </div>
+            </div>
+            
+                        
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</body>
+</html>
