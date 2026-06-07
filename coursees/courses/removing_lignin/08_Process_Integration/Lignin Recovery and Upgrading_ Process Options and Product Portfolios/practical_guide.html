@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson Module - Agent Task Suites and Evaluation Rubrics</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked-katex-extension/lib/index.umd.js"></script>
+
+  <script>
+    // Minimal Tailwind shim (used only if CDN fails). This keeps the page functional without external deps.
+    (function(){
+      var ok = true;
+      try{
+        if(!window.tailwind) ok = false;
+      }catch(e){ ok = false; }
+    })();
+  </script>
+  <style>
+    /* ========================================
+      PREMIUM THEME & TYPOGRAPHY VARIABLES
+      ========================================
+    */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root{
+      --bg-base: #05050a;
+      --bg-surface: rgba(17, 18, 28, 0.65);
+      --bg-surface-hover: rgba(255, 255, 255, 0.05);
+      
+      --stroke-soft: rgba(255, 255, 255, 0.08);
+      --stroke-strong: rgba(255, 255, 255, 0.15);
+      
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-heading: #ffffff;
+      
+      --accent-primary: #8b5cf6;
+      --accent-secondary: #3b82f6;
+      --accent-gradient: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      
+      --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --shadow-glow: 0 0 40px rgba(139, 92, 246, 0.15);
+      
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      
+      --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      
+      /* New Wider Content Width */
+      --content-max-width: 1200px; 
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      /* Dynamic ambient background */
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.08), transparent 40%),
+        radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.08), transparent 40%);
+      background-attachment: fixed;
+    }
+
+    /* ========================================
+      LAYOUT & SHELL
+      ========================================
+    */
+    main {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .view-shell {
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    
+    .view-inner {
+      padding: clamp(20px, 4vw, 48px) 24px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ========================================
+      TOP HEADER & TYPOGRAPHY
+      ========================================
+    */
+    .topbar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+      margin-bottom: 40px;
+      width: 100%;
+      max-width: var(--content-max-width);
+      animation: fadeDown 0.6s ease-out;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border: 1px solid var(--stroke-strong);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 999px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent-gradient);
+      box-shadow: 0 0 8px var(--accent-primary);
+    }
+
+    .title {
+      margin: 8px 0 0 0;
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--text-heading);
+      background: linear-gradient(to right, #ffffff, #a5b4fc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: clamp(16px, 1.5vw, 18px);
+      line-height: 1.6;
+      max-width: 60ch;
+    }
+
+    /* ========================================
+      MAIN CARD (WIDER VIEWPORT)
+      ========================================
+    */
+    .grid {
+      display: flex;
+      width: 100%;
+      justify-content: center;
+      flex-grow: 1;
+    }
+
+    .card {
+      width: 100%;
+      max-width: var(--content-max-width);
+      border: 1px solid var(--stroke-soft);
+      background: var(--bg-surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-soft), var(--shadow-glow);
+    }
+
+    .card-h {
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--stroke-soft);
+      background: rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-h h2 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .card-b {
+      padding: clamp(24px, 5vw, 56px);
+      flex-grow: 1;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #c4b5fd;
+    }
+
+    /* ========================================
+      NAVIGATION BOTTOM BAR
+      ========================================
+    */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 24px;
+      border-top: 1px solid var(--stroke-soft);
+      background: rgba(5, 5, 10, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 14px 28px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke-strong);
+      background: var(--bg-surface);
+      color: var(--text-heading);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--bg-surface-hover);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      border: none;
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #9f7aea, #60a5fa);
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ========================================
+      ENHANCED MARKDOWN TYPOGRAPHY
+      ========================================
+    */
+    .markdown-body {
+      max-width: 100%;
+      margin: 0 auto;
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--text-main);
+    }
+
+    .markdown-body h1, 
+    .markdown-body h2, 
+    .markdown-body h3 {
+      color: var(--text-heading);
+      font-weight: 600;
+      margin-top: 2em;
+      margin-bottom: 0.75em;
+      line-height: 1.3;
+    }
+
+    .markdown-body h1 { 
+      font-size: 2.25em; 
+      letter-spacing: -0.02em;
+    }
+    
+    .markdown-body h2 { 
+      font-size: 1.75em; 
+      letter-spacing: -0.01em;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid var(--stroke-soft);
+    }
+    
+    .markdown-body h3 { 
+      font-size: 1.35em; 
+      color: #e2e8f0;
+    }
+
+    /* Eliminate top margin for the very first element to align with padding */
+    .markdown-body > *:first-child { margin-top: 0; }
+
+    .markdown-body p {
+      margin-top: 0;
+      margin-bottom: 1.25em;
+    }
+
+    .markdown-body ul, 
+    .markdown-body ol {
+      margin-top: 0;
+      margin-bottom: 1.5em;
+      padding-left: 1.5em;
+    }
+
+    .markdown-body li {
+      margin-bottom: 0.5em;
+    }
+
+    .markdown-body li > ul, 
+    .markdown-body li > ol {
+      margin-top: 0.5em;
+    }
+
+    .markdown-body strong {
+      color: var(--text-heading);
+      font-weight: 600;
+    }
+
+    .markdown-body a {
+      color: var(--accent-secondary);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    .markdown-body a:hover {
+      border-bottom-color: var(--accent-secondary);
+    }
+
+    .markdown-body code {
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.2em 0.4em;
+      border-radius: 6px;
+      font-size: 0.9em;
+      color: #93c5fd; /* Light blue tint for inline code */
+    }
+
+    .markdown-body pre {
+      background: #0d1117;
+      border: 1px solid var(--stroke-soft);
+      border-radius: var(--radius-md);
+      padding: 1.25em;
+      overflow-x: auto;
+      margin-bottom: 1.5em;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .markdown-body pre code {
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      color: #e2e8f0;
+      font-size: 0.9em;
+      line-height: 1.6;
+    }
+
+    .markdown-body blockquote {
+      margin: 0 0 1.5em 0;
+      padding: 0.5em 0 0.5em 1.5em;
+      border-left: 4px solid var(--accent-primary);
+      color: var(--text-muted);
+      background: linear-gradient(to right, rgba(139, 92, 246, 0.05), transparent);
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+
+    .markdown-body blockquote p:last-child {
+      margin-bottom: 0;
+    }
+
+    .markdown-body hr {
+      border: none;
+      height: 1px;
+      background: var(--stroke-strong);
+      margin: 3em 0;
+    }
+
+    /* ========================================
+      TASK CARD STYLES (STRUCTURED CARDS)
+      ========================================
+    */
+    .task-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .task-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--stroke-soft);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .task-card:hover {
+      border-color: var(--stroke-strong);
+      transform: translateY(-2px);
+    }
+    .task-card h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.25em;
+      color: var(--accent-secondary);
+    }
+    .objective-card {
+      border-left: 4px solid var(--accent-primary);
+    }
+    .instructions-list {
+      padding-left: 20px;
+    }
+    .instructions-list li {
+      margin-bottom: 12px;
+    }
+    .criteria-checklist {
+      list-style: none;
+      padding-left: 0;
+    }
+    .criteria-checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .criteria-checklist li::before {
+      content: "✓";
+      color: #10b981;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* KaTeX overrides for dark mode */
+    .katex {
+      color: var(--text-heading);
+      font-size: 1.1em;
+    }
+
+    /* ========================================
+      TRANSITIONS & ANIMATIONS
+      ========================================
+    */
+    .transition-opacity { transition: opacity 400ms ease, transform 400ms ease; }
+    .opacity-100 { opacity: 1; transform: translateY(0); }
+    .opacity-0 { opacity: 0; transform: translateY(10px); }
+    .hidden { display: none !important; }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .transition-opacity { transition: none !important; }
+      .btn { transition: none !important; }
+      .topbar { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <textarea id="markdown-source" style="display:none;">
+    [
+  {
+    "id": "guide_page_1",
+    "content": "# Page 1 \u2014 Objective and Prerequisites\n\n## Objective\nBuild a **lignin valorization workflow** that takes recovered lignin from a biorefinery and routes it into the **highest-value feasible product portfolio** based on its quality, reactivity, and purity.\n\nBy the end of this guide, you should be able to:\n1. **Select a lignin recovery route** that preserves reactivity.\n2. **Classify the recovered lignin** by purity, condensation level, and downstream suitability.\n3. **Choose an upgrading pathway** for either materials or chemicals.\n4. **Integrate process and market constraints** so the route is technically and economically realistic.\n\n## Technical prerequisites\nYou need access to the following technical capabilities and tools:\n- **Biorefinery lignin sample or process data** from kraft, sulfite, organosolv, ionic-liquid, DES, hydrotropic, or enzymatic fractionation.\n- **Analytical equipment** for lignin characterization:\n  - Gel permeation chromatography (GPC/SEC)\n  - 2D HSQC NMR or equivalent structural analysis\n  - FTIR and/or UV-Vis spectroscopy\n  - Ash and carbohydrate contamination analysis\n- **Basic conversion equipment or partner access**:\n  - Batch reactor or catalytic reactor setup\n  - Separation tools for filtration, solvent recovery, and washing\n- **A solvent recovery and wastewater handling plan** if using organosolv, ionic liquids, deep eutectic solvents, or hydrotropes.\n- **Techno-economic assessment (TEA) and life-cycle assessment (LCA) software or templates** such as Excel-based models, Aspen Plus, or open TEA/LCA frameworks.\n\n## What to decide before starting\n- What is your **target product class**?\n  - Specialty chemicals\n  - Engineered polymers\n  - Carbon materials\n  - Bio-based aromatics\n  - Bulk fuel intermediates\n- What is your **acceptable process intensity**?\n  - Mild, preservation-oriented fractionation\n  - Moderate catalytic upgrading\n  - High-severity depolymerization\n- What lignin quality do you already have?\n  - Low-condensation, high-purity lignin\n  - Mixed technical lignin\n  - Highly contaminated or sulfur-rich lignin\n\n## Quick decision rule\n- **If you want high-value chemicals or polymer feedstocks:** prioritize **mild isolation** and **stabilization**.\n- **If you have heterogeneous technical lignin:** prioritize **robust, lower-cost applications**.\n- **If purification is expensive:** avoid forcing lignin into high-spec specialty markets."
+  },
+  {
+    "id": "guide_page_2",
+    "content": "# Page 2 \u2014 Isolate and Stabilize Lignin Correctly\n\n## Step 1: Choose the recovery route based on desired lignin quality\n\n### The Action\nSelect the lignin isolation process before you design upgrading.\n\n### Why it matters\nIsolation conditions determine whether lignin stays reactive or becomes condensed and difficult to convert.\n\n### How to do it\nUse this routing logic:\n- **Kraft or sulfite lignin**: choose when industrial availability and scale matter more than pristine structure.\n- **Organosolv lignin**: choose when you need cleaner lignin with fewer impurities.\n- **Ionic liquid or deep eutectic solvent lignin**: choose when you want tunable fractionation and potentially better structural preservation.\n- **Hydrotropic or enzymatic routes**: choose when mild processing is critical.\n\n**Example template:**\n- Feedstock: hardwood residues\n- Target: phenolic resin feedstock\n- Selected route: **organosolv fractionation** with low-severity conditions\n- Reason: lower ash, better solubility, and higher structural accessibility\n\n---\n\n## Step 2: Stabilize reactive fragments immediately after solubilization\n\n### The Action\nPrevent lignin condensation during and right after extraction.\n\n### Why it matters\nOnce reactive intermediates condense, you lose \u03b2-O-4 content and reduce downstream reactivity.\n\n### How to do it\nApply stabilization-oriented practices such as:\n- Rapid cooling after pretreatment\n- Mild pH control during recovery\n- Capping or protecting reactive aldehyde/quinone-like intermediates when the process allows\n- Short residence times at high temperature\n- Avoiding unnecessary acid severity\n\n**Example template:**\n- During pretreatment, keep residence time below the point where darkening and viscosity spike.\n- Immediately separate the liquor from solids.\n- Wash and neutralize before storage or conversion.\n\n---\n\n## Step 3: Characterize the lignin stream before assigning a use case\n\n### The Action\nMeasure lignin properties that predict conversion behavior.\n\n### Why it matters\nProduct selection should be based on measurable quality, not on lignin source alone.\n\n### How to do it\nTrack these attributes:\n- **Molecular weight distribution** by GPC/SEC\n- **\u03b2-O-4 linkage abundance** by 2D NMR\n- **Ash and carbohydrate impurities** by compositional analysis\n- **Functional groups** by FTIR/UV-Vis\n- **Solubility** in candidate solvents\n\n**Example template:**\n- Low molecular weight + high \u03b2-O-4 + low ash = strong candidate for depolymerization or reactive polymers\n- High ash + broad distribution + high condensation = better suited to binders, carbon materials, or fuel blending\n\n---\n\n## Step 4: Clean and condition the lignin for downstream use\n\n### The Action\nRemove salts, residual solvents, sugars, and catalyst poisons.\n\n### Why it matters\nContaminants reduce catalytic performance, product color quality, and shelf stability.\n\n### How to do it\nUse a conditioning sequence such as:\n1. Filtration\n2. Washing or solvent exchange\n3. Neutralization\n4. Drying under controlled temperature\n5. Storage in moisture-protected containers\n\n**Example template:**\n- Organosolv lignin slurry \u2192 filter \u2192 ethanol wash \u2192 vacuum dry \u2192 sealed drum storage"
+  },
+  {
+    "id": "guide_page_3",
+    "content": "# Page 3 \u2014 Upgrade Lignin Into the Right Product Portfolio\n\n## Step 5: Choose between materials and chemical depolymerization pathways\n\n### The Action\nAssign lignin to either a **polymeric materials route** or a **chemical conversion route**.\n\n### Why it matters\nThe best value comes from matching lignin structure to the product\u2019s performance requirements.\n\n### How to do it\nUse the following decision map:\n- **Materials route** if lignin has moderate-to-high molecular weight and usable functional groups.\n- **Depolymerization route** if lignin is sufficiently reactive and low in condensation.\n\n**Example template:**\n- Lignin from mild organosolv fractionation \u2192 resin modifier\n- Lignin from lignin-first fractionation \u2192 aromatic monomer platform\n\n---\n\n## Step 6: Convert lignin into polymer products when reactivity is sufficient\n\n### The Action\nFunctionalize lignin and incorporate it into polymers and resins.\n\n### Why it matters\nThis route can generate value without fully breaking lignin into monomers.\n\n### How to do it\nTarget these applications:\n- **Phenol-formaldehyde resins**: replace part of fossil phenol with lignin\n- **Polyurethanes**: increase rigidity after hydroxyl functionalization\n- **Epoxy systems**: improve mechanical and thermal properties\n- **Coatings**: exploit UV resistance and aromatic character\n\n**Example template:**\n- Apply hydroxymethylation or demethylation if needed.\n- Replace 20\u201340% of phenol in a resin formulation with lignin.\n- Test viscosity, cure time, and mechanical strength.\n\n---\n\n## Step 7: Convert lignin into chemicals when monomer production is the goal\n\n### The Action\nSelect an appropriate depolymerization chemistry.\n\n### Why it matters\nDifferent reaction families produce different product slates and purity profiles.\n\n### How to do it\nChoose among:\n- **Oxidative depolymerization** for vanillin, syringaldehyde, and related aromatics\n- **Reductive catalytic fractionation** for phenols and stabilized aromatic fragments\n- **Hydrogenolysis** for deoxygenated aromatics and cycloalkanes\n- **Biological funneling** for muconic acid, lipids, PHA, and bioconverted aromatics\n\n**Example template:**\n- Goal: vanillin \u2192 use controlled oxidation with selective catalyst/oxidant system\n- Goal: phenolic monomers \u2192 use reductive catalytic fractionation followed by separation\n- Goal: bioproducts \u2192 send aromatic hydrolysate to engineered microbes\n\n---\n\n## Step 8: Separate products and recycle what you can\n\n### The Action\nBuild a downstream separation plan for monomers, oligomers, catalysts, and solvents.\n\n### Why it matters\nEconomics depend heavily on product isolation and recycle efficiency.\n\n### How to do it\nDesign for:\n- Distillation or membrane recovery of solvents\n- Catalyst filtration or regeneration\n- Fractionation into monomers, oligomers, and residue\n- Purification only to the level required by the market\n\n**Example template:**\n- Collect monomer-rich oil phase\n- Recover solvent by evaporation or distillation\n- Recycle hydrogenation catalyst after filtration\n- Send heavy residue to carbon material or heat recovery"
+  },
+  {
+    "id": "guide_page_4",
+    "content": "# Page 4 \u2014 Match Lignin Quality to Market, Then Validate Economics and Sustainability\n\n## Step 9: Match lignin quality to the highest feasible market\n\n### The Action\nMap lignin quality to product value before scaling.\n\n### Why it matters\nNot every lignin stream justifies the same purification and conversion cost.\n\n### How to do it\nUse this matching logic:\n- **High-purity, low-condensation lignin** \u2192 specialty chemicals, advanced polymers\n- **Technical lignin with moderate heterogeneity** \u2192 binders, dispersants, carbon materials\n- **Highly contaminated or low-value lignin** \u2192 combustion or lower-spec applications\n\n**Example template:**\n- If sulfur content is high and structure is heavily condensed, avoid expensive monomer purification.\n- If lignin has high \u03b2-O-4 content and low ash, pursue value-added chemical conversion.\n\n---\n\n## Step 10: Run a techno-economic check before scale-up\n\n### The Action\nEstimate cost drivers for each product pathway.\n\n### Why it matters\nA route can be chemically successful but economically unviable.\n\n### How to do it\nCalculate or estimate:\n- Feedstock cost\n- Solvent loss\n- Catalyst cost and lifetime\n- Separation and drying energy\n- Wastewater treatment cost\n- Product selling price and market size\n\n**Example template:**\n- If solvent recovery is below an acceptable threshold, redesign the fractionation loop before scaling.\n- If purification cost exceeds product margin, downgrade to a lower-spec application.\n\n---\n\n## Step 11: Check life-cycle impacts and adjust the process design\n\n### The Action\nCompare environmental burdens across candidate routes.\n\n### Why it matters\nA high-yield process may still be unsustainable if it creates excessive energy demand or waste streams.\n\n### How to do it\nAssess:\n- Energy use\n- Solvent leakage\n- Water consumption\n- Wastewater load\n- Catalyst recyclability\n- Carbon footprint per unit product\n\n**Example template:**\n- Route A gives higher monomer yield but high solvent loss.\n- Route B gives slightly lower yield but better solvent recycling.\n- Choose Route B if total footprint and cost are lower.\n\n---\n\n## Step 12: Implement a portfolio strategy instead of a single-product strategy\n\n### The Action\nDesign the lignin platform to produce multiple outputs from different lignin fractions.\n\n### Why it matters\nPortfolio routing improves robustness when lignin quality varies.\n\n### How to do it\nSplit streams by quality:\n- Best fraction \u2192 specialty chemicals or engineered polymers\n- Mid-grade fraction \u2192 dispersants, binders, coatings\n- Residual fraction \u2192 carbon materials or energy recovery\n\n**Example template:**\n- Fraction 1: low-condensation lignin \u2192 polymer feedstock\n- Fraction 2: mixed technical lignin \u2192 resin additive\n- Fraction 3: heavy residue \u2192 process heat or carbon precursor\n\n## Final implementation rule\nDesign lignin recovery, stabilization, conversion, separation, and market selection as **one integrated system**. Do not choose the chemistry first and the product later. Start with lignin quality, then select the least destructive recovery method, and only then assign the conversion route that gives the best value with the lowest processing burden."
+  }
+]
+  </textarea>
+
+  <main>
+    <section id="lesson-app" style="width: 100%;">
+      <div class="view-shell">
+        <div class="view-inner">
+          <div class="topbar">
+            <div class="badge">
+              <span class="dot"></span>
+              <span>Practical Guide</span>
+            </div>
+            <h1 class="title">Practical Guide</h1>
+            <p class="subtitle">A step-by-step walkthrough of the implementation.</p>
+          </div>
+
+          <div class="grid">
+            <div class="card">
+              <div class="card-b">
+                <div id="sections-wrapper">
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav">
+          <button type="button" class="btn" id="prevBtn" aria-label="Previous section">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Previous</span>
+          </button>
+          <button type="button" class="btn btn-primary" id="nextBtn" aria-label="Next section">
+            <span>Continue to Next</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  (function () {
+  // ==========================================
+  // 1. HELPER FUNCTIONS
+  // ==========================================
+
+  function escapeHtml(s){
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function simpleMarkdownToHtml(md){
+    var lines = String(md || '').replace(/\r\n/g, '\n').split('\n');
+    var html = [];
+    var inCodeFence = false;
+    var codeLang = '';
+    var codeBuf = [];
+
+    function flushCode(){
+      if(!codeBuf.length) return;
+      var code = escapeHtml(codeBuf.join('\n'));
+      html.push('<pre><code' + (codeLang ? ' class="language-' + escapeHtml(codeLang) + '"' : '') + '>' + code + '</code></pre>');
+      codeBuf = [];
+      codeLang = '';
+    }
+
+    for(var i=0;i<lines.length;i++){
+      var line = lines[i];
+
+      var fenceMatch = line.match(/^\s*```(\w+)?\s*$/);
+      if(fenceMatch){
+        if(!inCodeFence){
+          inCodeFence = true;
+          codeLang = fenceMatch[1] || '';
+          codeBuf = [];
+        } else {
+          inCodeFence = false;
+          flushCode();
+        }
+        continue;
+      }
+
+      if(inCodeFence){
+        codeBuf.push(line);
+        continue;
+      }
+
+      if(/^\s*---\s*$/.test(line)){
+        html.push('<hr/>');
+        continue;
+      }
+
+      var headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+      if(headingMatch){
+        var level = headingMatch[1].length;
+        var text = headingMatch[2].trim();
+        html.push('<h' + level + '>' + renderInline(text) + '</h' + level + '>');
+        continue;
+      }
+
+      var ulMatch = line.match(/^\s*-\s+(.*)$/);
+      if(ulMatch){
+        var items = [];
+        while(i < lines.length && (m = lines[i].match(/^\s*-\s+(.*)$/))){
+          items.push('<li>' + renderInline(m[1].trim()) + '</li>');
+          i++;
+        }
+        i--;
+        html.push('<ul>' + items.join('') + '</ul>');
+        continue;
+      }
+
+      if(line.trim() === ''){
+        continue;
+      }
+
+      html.push('<p>' + renderInline(line.trim()) + '</p>');
+    }
+
+    flushCode();
+    return html.join('');
+
+    function renderInline(text){
+      var out = escapeHtml(text);
+      out = out.replace(/`([^`]+)`/g, function(_, code){ return '<code>' + code + '</code>'; });
+      out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      return out;
+    }
+  }
+
+  // ==========================================
+  // 2. DATA EXTRACTION & DYNAMIC PAGE CREATION
+  // ==========================================
+
+  var rawEl = document.getElementById('markdown-source');
+  var raw = rawEl ? rawEl.value : '[]';
+
+  var lessonParts;
+  try {
+    var parsedData = JSON.parse(raw.trim());
+    // UPDATED LOGIC: Handle both a direct array or the `{ parts: [...] }` object structure
+    lessonParts = Array.isArray(parsedData) ? parsedData : (parsedData.parts || []);
+  } catch(e) {
+    lessonParts = []; 
+  }
+  if(!Array.isArray(lessonParts)) lessonParts = [];
+
+  var wrapper = document.getElementById('sections-wrapper');
+  if (wrapper) wrapper.innerHTML = ''; 
+
+  lessonParts.forEach(function(part) {
+    var article = document.createElement('article');
+    article.id = part.id;
+    article.className = 'lesson-section transition-opacity duration-300 opacity-0 hidden';
+    
+    var innerDiv = document.createElement('div');
+    innerDiv.className = 'markdown-body';
+    innerDiv.setAttribute('data-content-target', part.id);
+    
+    article.appendChild(innerDiv);
+    if (wrapper) wrapper.appendChild(article);
+  });
+
+  // ==========================================
+  // 3. MARKDOWN PARSING & INJECTION
+  // ==========================================
+
+  var hasMarked = typeof window.marked !== 'undefined' && window.marked && typeof window.marked.parse === 'function';
+  
+  if(hasMarked){
+    try{
+      // Attach the KaTeX extension so formulas render properly
+      if (typeof window.markedKatex !== 'undefined') {
+        window.marked.use(window.markedKatex({
+          throwOnError: false,
+          output: 'html'
+        }));
+      }
+      window.marked.setOptions({ breaks: false, gfm: true });
+    }catch(e){}
+  }
+
+  lessonParts.forEach(function (part) {
+    var target = document.querySelector('[data-content-target="' + part.id + '"]');
+    if (target) {
+      var content = (part.content || '').trim();
+      // If the content starts with an HTML tag, inject it directly to bypass Markdown escaping
+      if (content.startsWith('<')) {
+        target.innerHTML = content;
+      } else {
+        target.innerHTML = hasMarked ? window.marked.parse(content) : simpleMarkdownToHtml(content);
+      }
+    }
+  });
+
+  // ==========================================
+  // 4. NAVIGATION STATE & LOGIC
+  // ==========================================
+
+  var sections = lessonParts
+    .map(function(part){ return document.getElementById(part.id); })
+    .filter(Boolean);
+
+  var currentIndex = 0; 
+
+  var contentStatus = document.getElementById('content-status');
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+
+  function updateMeta(index) {
+    if(contentStatus) contentStatus.textContent = 'Section ' + (index + 1) + ' of ' + lessonParts.length;
+
+    var atFirst = index === 0;
+    var atLast = index === lessonParts.length - 1;
+
+    if(prevBtn){
+      prevBtn.disabled = atFirst;
+    }
+    if(nextBtn){
+      nextBtn.disabled = atLast;
+    }
+    
+    var cardElement = document.querySelector('.card');
+    if(cardElement && window.scrollY > cardElement.offsetTop) {
+        window.scrollTo({ top: cardElement.offsetTop - 20, behavior: 'smooth' });
+    }
+  }
+
+  function showSection(index) {
+    if(!sections.length) return;
+    sections.forEach(function (section, i) {
+      if (i === index) {
+        section.classList.remove('hidden');
+        requestAnimationFrame(function () {
+          section.classList.remove('opacity-0');
+          section.classList.add('opacity-100');
+        });
+      } else {
+        section.classList.add('opacity-0');
+        section.classList.remove('opacity-100');
+        section.classList.add('hidden');
+      }
+    });
+    currentIndex = index;
+    updateMeta(index);
+  }
+
+  function transitionTo(index) {
+    if(!sections.length) return;
+    if (index < 0 || index >= sections.length || index === currentIndex) return;
+
+    var current = sections[currentIndex];
+    if(!current) return;
+
+    current.classList.add('opacity-0');
+    current.classList.remove('opacity-100');
+
+    window.setTimeout(function () {
+      current.classList.add('hidden'); 
+      
+      var next = sections[index];
+      if(!next) return;
+
+      next.classList.remove('hidden'); 
+      requestAnimationFrame(function () {
+        next.classList.remove('opacity-0');
+        next.classList.add('opacity-100');
+      });
+
+      currentIndex = index;
+      updateMeta(index);
+    }, 400);
+  }
+
+  // ==========================================
+  // 5. EVENT LISTENERS & INITIALIZATION
+  // ==========================================
+
+  if(prevBtn) prevBtn.addEventListener('click', function () { transitionTo(currentIndex - 1); });
+  if(nextBtn) nextBtn.addEventListener('click', function () { transitionTo(currentIndex + 1); });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'ArrowLeft') transitionTo(currentIndex - 1);
+    if (event.key === 'ArrowRight') transitionTo(currentIndex + 1);
+  });
+
+  if(sections.length) {
+    showSection(0);
+  } else {
+    updateMeta(0); 
+  }
+
+})();
+  </script>
+</body>
+</html>
